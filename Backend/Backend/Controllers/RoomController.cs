@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -20,19 +17,17 @@ namespace Backend.Controllers
             this.roomManager = roomManager;
         }
 
+        [HttpPost]
+        [Route("room/create")]
+        public IActionResult Create([FromBody] CreateRoomRequestDto requestDto) =>
+            Ok(roomManager.Create(requestDto));
+
         [HttpGet]
         [Route("room/{roomId}/getStatus")]
-        public ActionResult GetStatus()
+        public IActionResult GetStatus([FromRoute] Guid roomId, [FromQuery] Guid userId)
         {
-            var status = roomManager.GetStatus();
-            return Ok(status);
-        }
-
-        [HttpPost]
-        [Route("")]
-        public IActionResult SetShip(Ship ship, int x, int y)
-        {
-            roomManager.SetShip(ship, x, y);
+            // if room not exists then return 404
+            return Ok(roomManager.GetStatus(roomId, userId));
         }
     }
 }
