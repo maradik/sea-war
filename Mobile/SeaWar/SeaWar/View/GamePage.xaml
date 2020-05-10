@@ -9,7 +9,30 @@
            HorizontalOptions="Center"
            VerticalOptions="CenterAndExpand" />
         
-        
+        <CollectionView ItemsSource="{Binding Cells}">
+            <CollectionView.ItemsLayout>
+                <GridItemsLayout Orientation="Horizontal" Span="10" />
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    
+                    <!-- ВАЖНО! Такой подход работает с массивом массивов -->
+                    <!-- Для отрисовки многомерного массива, возможно, даже не нужно вложенности. Не успел попробовать -->
+                    <CollectionView ItemsSource="{Binding .}"> 
+                        <CollectionView.ItemsLayout>
+                            <GridItemsLayout Orientation="Vertical" Span="10" />
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Label Text="{Binding Status}" />
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                    
+                    
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
     </StackLayout>
 
 </ContentPage>
