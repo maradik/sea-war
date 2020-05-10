@@ -1,4 +1,4 @@
-﻿namespace SeaWar.Contracts
+﻿namespace SeaWar.Client.Contracts
 {
     public enum CreateRoomStatus
     {

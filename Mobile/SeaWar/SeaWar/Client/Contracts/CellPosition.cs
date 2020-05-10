@@ -1,4 +1,4 @@
-﻿namespace SeaWar.Contracts
+﻿namespace SeaWar.Client.Contracts
 {
     public class CellPosition
     {
@@ -8,7 +8,7 @@
             Y = y;
         }
 
-        public int X { get; }
-        public int Y { get; }
+        public int X { get; set; }
+        public int Y { get; set; }
     }
 }

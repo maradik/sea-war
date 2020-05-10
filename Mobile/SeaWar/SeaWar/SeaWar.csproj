@@ -11,11 +11,16 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
         <PackageReference Include="Xamarin.Forms" Version="3.3.0.912540" />
     </ItemGroup>
 
     <ItemGroup>
       <EmbeddedResource Update="View\WelcomePage.xaml">
+        <SubType>Designer</SubType>
+        <Generator></Generator>
+      </EmbeddedResource>
+      <EmbeddedResource Update="View\WaitGamePage.xaml">
         <SubType>Designer</SubType>
         <Generator></Generator>
       </EmbeddedResource>
@@ -25,6 +30,9 @@
       <Compile Update="View\WelcomePage.xaml.cs">
         <DependentUpon>WelcomePage.xaml</DependentUpon>
         <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="View\WaitGamePage.xaml.cs">
+        <DependentUpon>WaitGamePage.xaml</DependentUpon>
       </Compile>
     </ItemGroup>
 </Project>

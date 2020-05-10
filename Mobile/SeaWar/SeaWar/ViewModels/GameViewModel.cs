@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using SeaWar.Client;
-using SeaWar.Contracts;
+using SeaWar.Client.Contracts;
 using SeaWar.Extensions;
 
 namespace SeaWar.ViewModels
@@ -11,21 +11,24 @@ namespace SeaWar.ViewModels
     public class GameViewModel : INotifyPropertyChanged
     {
         private static readonly TimeSpan fireTimeout = TimeSpan.FromSeconds(10);
+        private static readonly TimeSpan periodOfStatusPolling = TimeSpan.FromSeconds(1);
 
         private readonly IClient client;
         private readonly PeriodicalTimer fireTimeoutTimer;
         private string formattedStatus;
         private string formattedTimeoutRemain;
-
-        public GameViewModel() =>
-            fireTimeoutTimer = new PeriodicalTimer(TimeSpan.FromSeconds(1), UpdateFormattedTimeoutRemainAsync, fireTimeout, RandomFireAsync);
-
-        public GameViewModel(IClient client) =>
+        private readonly GameModel gameModel;
+        
+        public GameViewModel(IClient client, GameModel gameModel)
+        {
             this.client = client;
+            this.gameModel = gameModel;
+            fireTimeoutTimer = new PeriodicalTimer(TimeSpan.FromSeconds(1), UpdateFormattedTimeoutRemainAsync, fireTimeout, RandomFireAsync);
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
-        public string MyName { get; }
-        public string OpponentName { get; }
+        public string MyName => gameModel.PlayerName;
+        public string OpponentName => gameModel.AnotherPlayerName;
 
         public string FormattedStatus
         {
@@ -50,9 +53,6 @@ namespace SeaWar.ViewModels
         public Map MyMap { get; set; }
         public Map OpponentMap { get; set; }
 
-        private Guid RoomId { get; }
-        private Guid PlayerId { get; }
-
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -62,18 +62,18 @@ namespace SeaWar.ViewModels
         {
             //TODO Задизейблить контролы
             fireTimeoutTimer.Stop();
-            var fireResult = await client.FireAsync(RoomId, PlayerId, new CellPosition(x, y));
+            var fireResult = await client.FireAsync(gameModel.RoomId, gameModel.PlayerId, new CellPosition(x, y));
             OpponentMap = fireResult.OpponentMap.ToModel();
 
             //ToDo redraw
-            Task.Run(async () => await GetStatusAsync()).ContinueInParallel();
+            await GetStatusAsync();
         }
 
         private async Task GetStatusAsync()
         {
             while (true)
             {
-                var gameStatus = await client.GetGameStatusAsync(RoomId, PlayerId);
+                var gameStatus = await client.GetGameStatusAsync(gameModel.RoomId, gameModel.PlayerId);
 
                 switch (gameStatus.GameStatus)
                 {
@@ -94,7 +94,7 @@ namespace SeaWar.ViewModels
                         throw new ArgumentOutOfRangeException();
                 }
 
-                await Task.Delay(1000);
+                await Task.Delay(periodOfStatusPolling);
             }
         }
 
