@@ -24,10 +24,7 @@ namespace Backend.Controllers
 
         [HttpGet]
         [Route("room/{roomId}/getStatus")]
-        public IActionResult GetStatus([FromRoute] Guid roomId, [FromQuery] Guid userId)
-        {
-            // if room not exists then return 404
-            return Ok(roomManager.GetStatus(roomId, userId));
-        }
+        public IActionResult GetStatus([FromRoute] Guid roomId, [FromQuery] Guid userId) =>
+            Ok(roomManager.GetStatus(roomId, userId));
     }
 }
