@@ -3,11 +3,7 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:validation="clr-namespace:SeaWar.Validation"
-             xmlns:local="clr-namespace:SeaWar.ViewModels"
              x:Class="SeaWar.WelcomePage">
-    <ContentPage.BindingContext>
-        <local:WelcomePageModelView />
-    </ContentPage.BindingContext>
     <ContentPage.Content>
         <StackLayout>
             <Label Text="Имя игрока" />

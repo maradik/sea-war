@@ -11,6 +11,7 @@ namespace SeaWar.ViewModels
 {
     public class GameViewModel : INotifyPropertyChanged
     {
+        private static readonly Random random = new Random();
         private static readonly TimeSpan fireTimeout = TimeSpan.FromSeconds(10);
         private static readonly TimeSpan periodOfStatusPolling = TimeSpan.FromSeconds(1);
 
@@ -108,7 +109,6 @@ namespace SeaWar.ViewModels
         private async Task RandomFireAsync()
         {
             FormattedTimeoutRemain = String.Empty;
-            var random = new Random();
             var x = random.Next(OpponentMap.Cells.GetLength(0));
             var y = random.Next(OpponentMap.Cells.GetLength(1));
             await FireAsync(x, y);

@@ -54,36 +54,25 @@ namespace SeaWar.ViewModels
 
         public Command StartGame { get; }
 
-        public WelcomePageModelView()
+        public WelcomePageModelView(GameModel gameModel, WaitGamePage waitGamePage, GamePage gamePage, IClient client)
         {
-            this.client = new FakeClient();
+            this.client = client;
             
             StartGame = new Command(async _ =>
             {
                 var createRoomResponse = await client.CreateRoomAsync(PlayerName);
-                var gameModel = new GameModel()
-                {
-                    PlayerName = PlayerName,
-                    PlayerId = createRoomResponse.PlayerId,
-                    RoomId = createRoomResponse.RoomId,
-                    AnotherPlayerName = createRoomResponse.AnotherPlayerName
-                };
+                gameModel.PlayerName = PlayerName;
+                gameModel.PlayerId = createRoomResponse.PlayerId;
+                gameModel.RoomId = createRoomResponse.RoomId;
+                gameModel.AnotherPlayerName = createRoomResponse.AnotherPlayerName;
                 
                 if (createRoomResponse.Status == CreateRoomStatus.ReadyForStart)
                 {
-                    var mainPage = new MainPage
-                    {
-                        BindingContext = new GameViewModel(client, gameModel)
-                    };
-                    await Application.Current.MainPage.Navigation.PushAsync(mainPage);
+                    await Application.Current.MainPage.Navigation.PushAsync(gamePage);
                 }
                 else
                 {
-                    var waitPage = new WaitGamePage
-                    {
-                        BindingContext = new WaitGamePageViewModel(client, gameModel)
-                    };
-                    await Application.Current.MainPage.Navigation.PushAsync(waitPage);
+                    await Application.Current.MainPage.Navigation.PushAsync(waitGamePage);
                 }
             });
         }
