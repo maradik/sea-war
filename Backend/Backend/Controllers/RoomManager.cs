@@ -5,17 +5,53 @@ using Backend.Models;
 
 namespace Backend.Controllers
 {
-    public class GetRoomStatusResponseDto
+    public enum GameStatus
     {
-        public Guid RoomId { get; set; }
-        public RoomStatus RoomStatus { get; set; }
-        public string AnotherPlayerName { get; set; }
-        public Guid PlayerId { get; set; }
+        YourChoice,
+        PendingForFriendChoice,
+        Finish
+    }
+
+    public enum FinishReason
+    {
+        ConnectionLost,
+        Winner,
+        Lost
+    }
+
+    public class GetGameStatusResponseDto
+    {
+        public GameStatus GameStatus { get; set; }
+        public TimeSpan YourChoiceTimeout { get; set; }
+        public FinishReason? FinishReason { get; set; }
+        public Map MyMap { get; set; }
     }
 
     public class RoomManager
     {
         private readonly Dictionary<Guid, Room> rooms = new Dictionary<Guid, Room>();
+
+        public GetGameStatusResponseDto GetGameStatus(Guid roomId, Guid playerId)
+        {
+            lock (rooms)
+            {
+                var room = rooms[roomId];
+                if (room.Player2 == null)
+                {
+                    //
+                }
+
+                var gameStatus = room.CurrentPlayerId == playerId ? GameStatus.YourChoice : GameStatus.PendingForFriendChoice;
+
+                return new GetGameStatusResponseDto
+                {
+                    YourChoiceTimeout = gameStatus == GameStatus.YourChoice ? TimeSpan.FromMinutes(1) : TimeSpan.MaxValue,
+                    MyMap = room.Player1.Id == playerId ? room.Player1.OwnMap : room.Player2.OwnMap,
+                    GameStatus = gameStatus,
+                    FinishReason = null
+                };
+            }
+        }
 
         public GetRoomStatusResponseDto GetStatus(Guid roomId, Guid playerId)
         {
@@ -103,7 +139,8 @@ namespace Backend.Controllers
                 Id = Guid.NewGuid(),
                 Status = RoomStatus.NotReady,
                 Player1 = player,
-                Player2 = null
+                Player2 = null,
+                CurrentPlayerId = player.Id
             };
     }
 

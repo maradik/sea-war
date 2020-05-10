@@ -17,6 +17,11 @@ namespace Backend.Controllers
             this.roomManager = roomManager;
         }
 
+        [HttpGet]
+        [Route("room/{roomId}/Game/GetStatus")]
+        public IActionResult GetGameStatus([FromRoute] Guid roomId, [FromQuery] Guid playerId) =>
+            Ok(roomManager.GetGameStatus(roomId, playerId));
+
         [HttpPost]
         [Route("room/create")]
         public IActionResult Create([FromBody] CreateRoomRequestDto requestDto) =>
