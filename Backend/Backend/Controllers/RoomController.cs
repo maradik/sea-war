@@ -4,6 +4,12 @@ using Microsoft.Extensions.Logging;
 
 namespace Backend.Controllers
 {
+    public class FireRequestDto
+    {
+        public int X { get; set; }
+        public int Y { get; set; }
+    }
+
     [ApiController]
     public class RoomController : ControllerBase
     {
@@ -21,6 +27,11 @@ namespace Backend.Controllers
         [Route("room/{roomId}/Game/GetStatus")]
         public IActionResult GetGameStatus([FromRoute] Guid roomId, [FromQuery] Guid playerId) =>
             Ok(roomManager.GetGameStatus(roomId, playerId));
+
+        [HttpPost]
+        [Route("room/{roomId}/Game/Fire")]
+        public IActionResult Fire([FromBody] FireRequestDto dto, [FromRoute] Guid roomId, [FromQuery] Guid playerId) =>
+            Ok(roomManager.Fire(dto, roomId, playerId));
 
         [HttpPost]
         [Route("room/create")]

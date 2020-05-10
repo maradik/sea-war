@@ -19,6 +19,11 @@ namespace Backend.Controllers
         Lost
     }
 
+    public class FireResponseDto
+    {
+        public Map EnemyMap { get; set; }
+    }
+
     public class GetGameStatusResponseDto
     {
         public GameStatus GameStatus { get; set; }
@@ -31,6 +36,29 @@ namespace Backend.Controllers
     {
         private readonly Dictionary<Guid, Room> rooms = new Dictionary<Guid, Room>();
 
+        public FireResponseDto Fire(FireRequestDto dto, Guid roomId, Guid playerId)
+        {
+            lock (rooms)
+            {
+                var room = rooms[roomId];
+                var enemyMap = playerId == room.Player1.Id ? room.Player2.OwnMap : room.Player1.OwnMap;
+                if (enemyMap.Cells[dto.Y, dto.X].Status == Cell.CellStatus.Empty)
+                {
+                    enemyMap.Cells[dto.Y, dto.X].Status = Cell.CellStatus.EmptyFired;
+                    room.CurrentPlayerId = playerId == room.Player1.Id ? room.Player2.Id : room.Player1.Id;
+                }
+                else if (enemyMap.Cells[dto.Y, dto.X].Status == Cell.CellStatus.EngagedByShip)
+                {
+                    enemyMap.Cells[dto.Y, dto.X].Status = Cell.CellStatus.EngagedByShipFired;
+                }
+
+                return new FireResponseDto
+                {
+                    EnemyMap = enemyMap
+                };
+            }
+        }
+
         public GetGameStatusResponseDto GetGameStatus(Guid roomId, Guid playerId)
         {
             lock (rooms)
@@ -39,6 +67,7 @@ namespace Backend.Controllers
                 if (room.Player2 == null)
                 {
                     //
+                    return null;
                 }
 
                 var gameStatus = room.CurrentPlayerId == playerId ? GameStatus.YourChoice : GameStatus.PendingForFriendChoice;
