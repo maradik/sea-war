@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SeaWar.ViewModels;
+﻿using SeaWar.ViewModels;
 using Xamarin.Forms;
 
-namespace SeaWar
+namespace SeaWar.View
 {
     public partial class GamePage : ContentPage
     {

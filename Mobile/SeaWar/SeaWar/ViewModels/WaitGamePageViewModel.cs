@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using SeaWar.Client;
 using SeaWar.Client.Contracts;
 using SeaWar.DomainModels;
+using SeaWar.View;
 using Xamarin.Forms;
 
 namespace SeaWar.ViewModels

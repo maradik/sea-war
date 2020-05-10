@@ -35,7 +35,7 @@
       <Compile Update="View\WaitGamePage.xaml.cs">
         <DependentUpon>WaitGamePage.xaml</DependentUpon>
       </Compile>
-      <Compile Update="GamePage.xaml.cs">
+      <Compile Update="View\GamePage.xaml.cs">
         <DependentUpon>GamePage.xaml</DependentUpon>
       </Compile>
     </ItemGroup>

@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using SeaWar.View;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
