@@ -12,15 +12,14 @@ namespace SeaWar.Android
         protected override void OnResume()
         {
             base.OnResume();
-            Task startupWork = new Task(() => { SimulateStartup(); });
-            startupWork.Start();
+            Task.Factory.StartNew(() => Startup());
         }
 
         public override void OnBackPressed()
         {
         }
 
-        async void SimulateStartup()
+        async void Startup()
         {
             await Task.Delay(2000);
             StartActivity(new Intent(Application.ApplicationContext, typeof(MainActivity)));

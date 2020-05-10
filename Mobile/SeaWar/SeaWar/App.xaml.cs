@@ -17,7 +17,6 @@ namespace SeaWar
             var containerBuilder = new ContainerBuilder();
             containerBuilder.RegisterModule<AutofacModule>();
             Container = containerBuilder.Build();
-            
             MainPage = new NavigationPage(Container.Resolve<WelcomePage>());
         }
 
