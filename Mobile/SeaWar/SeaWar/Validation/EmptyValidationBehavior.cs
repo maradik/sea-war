@@ -1,6 +1,6 @@
 ﻿using Xamarin.Forms;
 
-namespace SeaWar.ViewModel
+namespace SeaWar.Validation
 {
     public class EmptyValidationBehavior: Behavior<Entry>
     {

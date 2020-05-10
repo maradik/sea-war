@@ -3,8 +3,8 @@ using System.Runtime.CompilerServices;
 using SeaWar.Annotations;
 using SeaWar.Client;
 using SeaWar.Client.Contracts;
+using SeaWar.Validation;
 using SeaWar.View;
-using SeaWar.ViewModel;
 using Xamarin.Forms;
 
 namespace SeaWar.ViewModels
@@ -53,9 +53,9 @@ namespace SeaWar.ViewModels
 
         public Command StartGame { get; }
 
-        public WelcomePageModelView(IClient client)
+        public WelcomePageModelView()
         {
-            this.client = client;
+            this.client = new FakeClient();
             
             StartGame = new Command(async _ =>
             {
