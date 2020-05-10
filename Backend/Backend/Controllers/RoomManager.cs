@@ -5,36 +5,19 @@ using Backend.Models;
 
 namespace Backend.Controllers
 {
-    public enum GameStatus
-    {
-        YourChoice,
-        PendingForFriendChoice,
-        Finish
-    }
-
-    public enum FinishReason
-    {
-        ConnectionLost,
-        Winner,
-        Lost
-    }
-
-    public class FireResponseDto
-    {
-        public Map EnemyMap { get; set; }
-    }
-
-    public class GetGameStatusResponseDto
-    {
-        public GameStatus GameStatus { get; set; }
-        public TimeSpan YourChoiceTimeout { get; set; }
-        public FinishReason? FinishReason { get; set; }
-        public Map MyMap { get; set; }
-    }
-
     public class RoomManager
     {
+        private readonly RoomBuilder roomBuilder;
+        private readonly PlayerBuilder playerBuilder;
+
         private readonly Dictionary<Guid, Room> rooms = new Dictionary<Guid, Room>();
+
+        public RoomManager(RoomBuilder roomBuilder,
+                           PlayerBuilder playerBuilder)
+        {
+            this.roomBuilder = roomBuilder;
+            this.playerBuilder = playerBuilder;
+        }
 
         public FireResponseDto Fire(FireRequestDto dto, Guid roomId, Guid playerId)
         {
@@ -104,7 +87,7 @@ namespace Backend.Controllers
                 if (rooms.Any(x => x.Value.Status == RoomStatus.NotReady))
                 {
                     var room = rooms.First(x => x.Value.Status == RoomStatus.NotReady).Value;
-                    var player = CreatePlayer(requestDto);
+                    var player = playerBuilder.Build(requestDto.PlayerName);
                     room.Player2 = player;
                     room.Player2.EnemyMap = room.Player1.OwnMap;
                     room.Player1.EnemyMap = room.Player2.OwnMap;
@@ -120,8 +103,8 @@ namespace Backend.Controllers
                 }
                 else
                 {
-                    var player = CreatePlayer(requestDto);
-                    var room = CreateRoom(player);
+                    var player = playerBuilder.Build(requestDto.PlayerName);
+                    var room = roomBuilder.Build(player, null);
                     rooms[room.Id] = room;
 
                     return new CreateRoomResponseDto
@@ -134,44 +117,5 @@ namespace Backend.Controllers
                 }
             }
         }
-
-        private static Map CreateMap()
-        {
-            var cells = new Cell[10, 10];
-            for (var i = 0; i < 10; ++i)
-            {
-                for (var j = 0; j < 10; ++j)
-                {
-                    cells[i, j] = new Cell
-                    {
-                        Status = Cell.CellStatus.Empty
-                    };
-                }
-            }
-
-            return new Map
-            {
-                Cells = cells
-            };
-        }
-
-        private static Player CreatePlayer(CreateRoomRequestDto requestDto) =>
-            new Player
-            {
-                Id = Guid.NewGuid(),
-                Name = requestDto.PlayerName,
-                OwnMap = CreateMap(),
-                EnemyMap = null
-            };
-
-        private static Room CreateRoom(Player player) =>
-            new Room
-            {
-                Id = Guid.NewGuid(),
-                Status = RoomStatus.NotReady,
-                Player1 = player,
-                Player2 = null,
-                CurrentPlayerId = player.Id
-            };
     }
 }
