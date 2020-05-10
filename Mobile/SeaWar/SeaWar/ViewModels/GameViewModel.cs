@@ -10,22 +10,23 @@ namespace SeaWar.ViewModels
 {
     public class GameViewModel : INotifyPropertyChanged
     {
-        private static readonly TimeSpan ChoiсeTimeout = TimeSpan.FromSeconds(10);
-        
+        private static readonly TimeSpan fireTimeout = TimeSpan.FromSeconds(10);
+
         private readonly IClient client;
+        private readonly PeriodicalTimer fireTimeoutTimer;
         private string formattedStatus;
         private string formattedTimeoutRemain;
-        private TimeSpan timeoutRemain;
+
+        public GameViewModel() =>
+            fireTimeoutTimer = new PeriodicalTimer(TimeSpan.FromSeconds(1), UpdateFormattedTimeoutRemainAsync, fireTimeout, RandomFireAsync);
 
         public GameViewModel(IClient client) =>
             this.client = client;
 
         public event PropertyChangedEventHandler PropertyChanged;
-
-        private Guid RoomId { get; }
-        private Guid PlayerId { get; }
         public string MyName { get; }
         public string OpponentName { get; }
+
         public string FormattedStatus
         {
             get => formattedStatus;
@@ -49,6 +50,9 @@ namespace SeaWar.ViewModels
         public Map MyMap { get; set; }
         public Map OpponentMap { get; set; }
 
+        private Guid RoomId { get; }
+        private Guid PlayerId { get; }
+
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -56,12 +60,13 @@ namespace SeaWar.ViewModels
 
         private async Task FireAsync(int x, int y)
         {
+            //TODO Задизейблить контролы
+            fireTimeoutTimer.Stop();
             var fireResult = await client.FireAsync(RoomId, PlayerId, new CellPosition(x, y));
             OpponentMap = fireResult.OpponentMap.ToModel();
 
             //ToDo redraw
-
-            Task.Run(async () => GetStatusAsync()).ContinueInParallel();
+            Task.Run(async () => await GetStatusAsync()).ContinueInParallel();
         }
 
         private async Task GetStatusAsync()
@@ -75,11 +80,12 @@ namespace SeaWar.ViewModels
                     case GameStatus.YourChoise:
                         MyMap = gameStatus.MyMap.ToModel();
                         FormattedStatus = "Твой ход";
+                        fireTimeoutTimer.Start();
+                        //TODO Раздизейблить контролы
                         return;
                     case GameStatus.PendingForFriendChoise:
                         FormattedStatus = "Ход соперника";
                         FormattedTimeoutRemain = string.Empty;
-                        //TODO Задизейблить контролы
                         break;
                     case GameStatus.Finish:
                         //TODO GoTo Finish screen
@@ -90,6 +96,21 @@ namespace SeaWar.ViewModels
 
                 await Task.Delay(1000);
             }
+        }
+
+        private Task UpdateFormattedTimeoutRemainAsync(TimeSpan remain)
+        {
+            FormattedTimeoutRemain = remain.ToString();
+            return Task.CompletedTask;
+        }
+
+        private async Task RandomFireAsync()
+        {
+            FormattedTimeoutRemain = String.Empty;
+            var random = new Random();
+            var x = random.Next(OpponentMap.Cells.GetLength(0));
+            var y = random.Next(OpponentMap.Cells.GetLength(1));
+            await FireAsync(x, y);
         }
     }
 }
