@@ -75,7 +75,7 @@ namespace SeaWar.ViewModels
                     {
                         BindingContext = new GameViewModel(client, gameModel)
                     };
-                    await Application.Current.MainPage.Navigation.PushAsync(mainPage);
+                    await Application.Current.MainPage.Navigation.PushModalAsync(mainPage);
                 }
                 else
                 {
@@ -83,7 +83,7 @@ namespace SeaWar.ViewModels
                     {
                         BindingContext = new WaitGamePageViewModel(client, gameModel)
                     };
-                    await Application.Current.MainPage.Navigation.PushAsync(waitPage);
+                    await Application.Current.MainPage.Navigation.PushModalAsync(waitPage);
                 }
             });
         }

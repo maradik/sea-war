@@ -7,7 +7,7 @@
         <StackLayout>
             <Label Text="Ждем подключения соперника"
                    VerticalOptions="CenterAndExpand"
-                   HorizontalOptions="CenterAndExpand" FontSize="Bold" />
+                   HorizontalOptions="CenterAndExpand"/>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>
