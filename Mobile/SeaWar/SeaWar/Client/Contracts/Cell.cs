@@ -1,9 +1,9 @@
-﻿namespace SeaWar.Contracts
+﻿namespace SeaWar.Client.Contracts
 {
     public class Cell
     {
         public CellStatus Status { get; set; }
-        
+
         public enum CellStatus
         {
             Empty = 0,

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using SeaWar.Contracts;
+using SeaWar.Client.Contracts;
 
 namespace SeaWar.Client
 {
