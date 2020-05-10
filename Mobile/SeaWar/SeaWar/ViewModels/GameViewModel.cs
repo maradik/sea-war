@@ -10,9 +10,12 @@ namespace SeaWar.ViewModels
 {
     public class GameViewModel : INotifyPropertyChanged
     {
+        private static readonly TimeSpan ChoiсeTimeout = TimeSpan.FromSeconds(10);
+        
         private readonly IClient client;
-        private string status;
-        private string formattedTimeout;
+        private string formattedStatus;
+        private string formattedTimeoutRemain;
+        private TimeSpan timeoutRemain;
 
         public GameViewModel(IClient client) =>
             this.client = client;
@@ -23,23 +26,23 @@ namespace SeaWar.ViewModels
         private Guid PlayerId { get; }
         public string MyName { get; }
         public string OpponentName { get; }
-        public string Status
+        public string FormattedStatus
         {
-            get => status;
+            get => formattedStatus;
             set
             {
-                status = value;
-                OnPropertyChanged(nameof(Status));
+                formattedStatus = value;
+                OnPropertyChanged(nameof(FormattedStatus));
             }
         }
 
-        public string FormattedTimeout
+        public string FormattedTimeoutRemain
         {
-            get => formattedTimeout;
+            get => formattedTimeoutRemain;
             set
             {
-                formattedTimeout = value;
-                OnPropertyChanged(nameof(FormattedTimeout));
+                formattedTimeoutRemain = value;
+                OnPropertyChanged(nameof(FormattedTimeoutRemain));
             }
         }
 
@@ -58,10 +61,10 @@ namespace SeaWar.ViewModels
 
             //ToDo redraw
 
-            Task.Run(GetStatus).ContinueInParallel();
+            Task.Run(async () => GetStatusAsync()).ContinueInParallel();
         }
 
-        private async Task GetStatus()
+        private async Task GetStatusAsync()
         {
             while (true)
             {
@@ -71,15 +74,12 @@ namespace SeaWar.ViewModels
                 {
                     case GameStatus.YourChoise:
                         MyMap = gameStatus.MyMap.ToModel();
-                        Status = "Твой ход";
+                        FormattedStatus = "Твой ход";
                         return;
-                    case GameStatus.PendingForFriendShips:
-                        Status = "Расстановка кораблей соперника"; //TODO этого статуса быть не должно по логике
-                        FormattedTimeout = string.Empty;
-                        break;
                     case GameStatus.PendingForFriendChoise:
-                        Status = "Ход соперника";
-                        FormattedTimeout = string.Empty;
+                        FormattedStatus = "Ход соперника";
+                        FormattedTimeoutRemain = string.Empty;
+                        //TODO Задизейблить контролы
                         break;
                     case GameStatus.Finish:
                         //TODO GoTo Finish screen
