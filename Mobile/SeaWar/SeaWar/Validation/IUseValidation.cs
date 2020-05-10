@@ -1,4 +1,4 @@
-﻿namespace SeaWar.ViewModel
+﻿namespace SeaWar.Validation
 {
     public interface IUseValidation
     {
