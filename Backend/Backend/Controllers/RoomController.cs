@@ -17,6 +17,11 @@ namespace Backend.Controllers
             this.roomManager = roomManager;
         }
 
+        [HttpPost]
+        [Route("room/create")]
+        public IActionResult Create([FromBody] CreateRoomRequestDto requestDto) =>
+            Ok(roomManager.Create(requestDto));
+
         [HttpGet]
         [Route("room/{roomId}/Game/GetStatus")]
         public IActionResult GetGameStatus([FromRoute] Guid roomId, [FromQuery] Guid playerId) =>
@@ -26,11 +31,6 @@ namespace Backend.Controllers
         [Route("room/{roomId}/Game/Fire")]
         public IActionResult Fire([FromBody] FireRequestDto dto, [FromRoute] Guid roomId, [FromQuery] Guid playerId) =>
             Ok(roomManager.Fire(dto, roomId, playerId));
-
-        [HttpPost]
-        [Route("room/create")]
-        public IActionResult Create([FromBody] CreateRoomRequestDto requestDto) =>
-            Ok(roomManager.Create(requestDto));
 
         [HttpGet]
         [Route("room/{roomId}/getStatus")]

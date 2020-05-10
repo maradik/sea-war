@@ -106,6 +106,8 @@ namespace Backend.Controllers
                     var room = rooms.First(x => x.Value.Status == RoomStatus.NotReady).Value;
                     var player = CreatePlayer(requestDto);
                     room.Player2 = player;
+                    room.Player2.EnemyMap = room.Player1.OwnMap;
+                    room.Player1.EnemyMap = room.Player2.OwnMap;
                     room.Status = RoomStatus.Ready;
 
                     return new CreateRoomResponseDto
@@ -159,7 +161,7 @@ namespace Backend.Controllers
                 Id = Guid.NewGuid(),
                 Name = requestDto.PlayerName,
                 OwnMap = CreateMap(),
-                EnemyMap = CreateMap()
+                EnemyMap = null
             };
 
         private static Room CreateRoom(Player player) =>
@@ -172,6 +174,4 @@ namespace Backend.Controllers
                 CurrentPlayerId = player.Id
             };
     }
-
-
 }
