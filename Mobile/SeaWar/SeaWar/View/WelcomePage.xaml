@@ -9,11 +9,14 @@
     </ContentPage.BindingContext>
     <ContentPage.Content>
         <StackLayout>
-            <Label Text="Имя игрока"
-                   VerticalOptions="CenterAndExpand"
-                   HorizontalOptions="CenterAndExpand" />
-            <Entry Text="{Binding UserName}"/>
-            <Button Text="Начать игру" Command="{Binding StartGame}"/>
+            <Label Text="Имя игрока" />
+            <Entry Text="{Binding UserName}">
+                <Entry.Behaviors>
+                    <local:EmptyValidationBehavior />
+                </Entry.Behaviors>
+            </Entry>
+            <Label Text="{Binding ErrorMessage}" TextColor="Red" />
+            <Button Text="Начать игру" Command="{Binding StartGame}" IsEnabled="{Binding IsValid}" />
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>
