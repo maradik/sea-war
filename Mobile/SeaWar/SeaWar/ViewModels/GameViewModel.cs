@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using SeaWar.Client;
-using SeaWar.Contracts;
+using SeaWar.Client.Contracts;
 using SeaWar.Extensions;
 
 namespace SeaWar.ViewModels
@@ -11,7 +11,7 @@ namespace SeaWar.ViewModels
     public class GameViewModel : INotifyPropertyChanged
     {
         private static readonly TimeSpan ChoiсeTimeout = TimeSpan.FromSeconds(10);
-        
+
         private readonly IClient client;
         private string formattedStatus;
         private string formattedTimeoutRemain;

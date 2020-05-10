@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SeaWar.Contracts
+namespace SeaWar.Client.Contracts
 {
     public class RoomResponse
     {

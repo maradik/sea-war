@@ -5,7 +5,7 @@ namespace SeaWar.Extensions
 {
     public static class MapExtensions
     {
-        public static ViewModels.Map ToModel(this Contracts.Map dto)
+        public static ViewModels.Map ToModel(this Client.Contracts.Map dto)
         {
             var xLength = dto.Cells.GetLength(0);
             var yLength = dto.Cells.GetLength(1);
@@ -25,20 +25,20 @@ namespace SeaWar.Extensions
 
             return domainModel;
         }
-        
-        public static Cell ToModel(this Contracts.Cell dto) =>
+
+        public static Cell ToModel(this Client.Contracts.Cell dto) =>
             new Cell
             {
                 Status = dto.Status.ToModel()
             };
 
-        public static CellStatus ToModel(this Contracts.Cell.CellStatus dto) =>
+        public static CellStatus ToModel(this Client.Contracts.Cell.CellStatus dto) =>
             dto switch
             {
-                Contracts.Cell.CellStatus.Empty => CellStatus.Empty,
-                Contracts.Cell.CellStatus.EngagedByShip => CellStatus.Filled,
-                Contracts.Cell.CellStatus.EmptyFired => CellStatus.Missed,
-                Contracts.Cell.CellStatus.EngagedByShipFired => CellStatus.Damaged,
+                Client.Contracts.Cell.CellStatus.Empty => CellStatus.Empty,
+                Client.Contracts.Cell.CellStatus.EngagedByShip => CellStatus.Filled,
+                Client.Contracts.Cell.CellStatus.EmptyFired => CellStatus.Missed,
+                Client.Contracts.Cell.CellStatus.EngagedByShipFired => CellStatus.Damaged,
                 _ => throw new ArgumentException(nameof(dto))
             };
     }
