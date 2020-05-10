@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using SeaWar.Annotations;
 using SeaWar.Client;
 using SeaWar.Client.Contracts;
+using SeaWar.DomainModels;
 using SeaWar.Validation;
 using SeaWar.View;
 using Xamarin.Forms;

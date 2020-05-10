@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using SeaWar.Client;
 using SeaWar.Client.Contracts;
+using SeaWar.DomainModels;
 using SeaWar.Extensions;
 
 namespace SeaWar.ViewModels

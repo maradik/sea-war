@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SeaWar.ViewModels
+namespace SeaWar.DomainModels
 {
     public class GameModel
     {

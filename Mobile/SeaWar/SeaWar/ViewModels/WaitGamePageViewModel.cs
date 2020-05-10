@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using SeaWar.Client;
+using SeaWar.DomainModels;
 
 namespace SeaWar.ViewModels
 {
