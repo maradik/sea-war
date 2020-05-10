@@ -16,6 +16,7 @@ namespace SeaWar.ViewModels
 
         private const int minUserNameLength = 5;
         private const string validateMessage = "Имя игрока должно быть не меньше 5 символов";
+        
         public event PropertyChangedEventHandler PropertyChanged;
 
         private string _playerName;
@@ -60,6 +61,8 @@ namespace SeaWar.ViewModels
 
             StartGame = new Command(async _ =>
             {
+                SavePlayerName();
+                
                 var parameters = new CreateRoomParameters
                 {
                     PlayerName = PlayerName
@@ -92,10 +95,25 @@ namespace SeaWar.ViewModels
             return string.IsNullOrEmpty(PlayerName) || PlayerName.Length < minUserNameLength;
         }
 
-        void IUseValidation.Validate()
+        public void Validate()
         {
             IsValid = !IsEmptyOrSmall();
             ErrorMessage = !IsValid ? validateMessage : string.Empty;
+        }
+
+        public void RestorePlayerName()
+        {
+            if (Application.Current.Properties.TryGetValue(nameof(PlayerName), out var playerName))
+            {
+                PlayerName = playerName.ToString();
+            }
+
+            Validate();
+        }
+
+        private void SavePlayerName()
+        {
+            Application.Current.Properties[nameof(PlayerName)] = PlayerName;
         }
     }
 }

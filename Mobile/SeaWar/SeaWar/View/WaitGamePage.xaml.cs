@@ -17,5 +17,13 @@ namespace SeaWar.View
             InitializeComponent();
             BindingContext = viewModel;
         }
+        
+        private WaitGamePageViewModel Model => (BindingContext as WaitGamePageViewModel);
+        
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+            Model.StartWaitAnotherPlayer();
+        }
     }
 }

@@ -20,8 +20,6 @@ namespace SeaWar.ViewModels
             this.client = client;
             this.gameModel = gameModel;
             this.gamePage = gamePage;
-            //TODO запускать поллинг не на создание модели, а через отдельный вызов на отображение экрана
-//            waitAnotherPlayerTask = Task.Run(async () => await WaitGameReadyAsync());
         }
 
         private async Task WaitGameReadyAsync()
@@ -52,6 +50,11 @@ namespace SeaWar.ViewModels
                     //TODO logging
                 }
             }
+        }
+
+        public void StartWaitAnotherPlayer()
+        {
+            waitAnotherPlayerTask = Task.Run(async () => await WaitGameReadyAsync());            
         }
     }
 }

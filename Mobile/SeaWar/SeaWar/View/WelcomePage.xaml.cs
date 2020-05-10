@@ -12,5 +12,13 @@ namespace SeaWar
             InitializeComponent();
             BindingContext = viewModel;
         }
+
+        private WelcomePageModelView Model => (BindingContext as WelcomePageModelView);
+        
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+            Model.RestorePlayerName();
+        }
     }
 }
