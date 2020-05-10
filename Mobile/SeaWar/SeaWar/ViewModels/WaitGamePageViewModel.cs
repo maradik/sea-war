@@ -27,18 +27,23 @@ namespace SeaWar.ViewModels
             {
                 try
                 {
-                    var getRoomStatusResponse = await client.GetRoomStatusAsync(gameModel.RoomId, gameModel.PlayerId);
+                    var parameters = new GetRoomStatusParameters
+                    {
+                        RoomId = gameModel.RoomId,
+                        PlayerId = gameModel.PlayerId
+                    };
+                    var getRoomStatusResponse = await client.GetRoomStatusAsync(parameters);
                     if (getRoomStatusResponse.Status == CreateRoomStatus.ReadyForStart)
                     {
                         var mainPage = new MainPage
                         {
                             BindingContext = new GameViewModel(client, gameModel)
                         };
-                        
+
                         Xamarin.Forms.Device.BeginInvokeOnMainThread(async () => {
                             await Application.Current.MainPage.Navigation.PushModalAsync(mainPage);
-                        });    
-                        
+                        });
+
                         return;
                     }
 
@@ -46,7 +51,7 @@ namespace SeaWar.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    //TODO logging 
+                    //TODO logging
                 }
             }
         }

@@ -7,8 +7,8 @@ namespace SeaWar.Client
     public class FakeClient : IClient
     {
         private int countTryReadyToPlay;
-        
-        public Task<RoomResponse> CreateRoomAsync(string playerName)
+
+        public Task<RoomResponse> CreateRoomAsync(CreateRoomParameters parameters)
         {
             return Task.FromResult(new RoomResponse()
             {
@@ -19,7 +19,7 @@ namespace SeaWar.Client
             });
         }
 
-        public Task<RoomResponse> GetRoomStatusAsync(Guid roomId, Guid playerId)
+        public Task<RoomResponse> GetRoomStatusAsync(GetRoomStatusParameters parameters)
         {
             countTryReadyToPlay++;
             var status = countTryReadyToPlay > 3
@@ -29,13 +29,13 @@ namespace SeaWar.Client
             return Task.FromResult(new RoomResponse()
             {
                 Status = status,
-                PlayerId = playerId,
-                RoomId = roomId,
+                PlayerId = parameters.PlayerId,
+                RoomId = parameters.RoomId,
                 AnotherPlayerName = nameof(RoomResponse.AnotherPlayerName)
             });
         }
 
-        public Task<GameStatusResponse> GetGameStatusAsync(Guid roomId, Guid playerId)
+        public Task<GameStatusResponse> GetGameStatusAsync(GetGameStatusParameters parameters)
         {
             return Task.FromResult(new GameStatusResponse()
             {
@@ -43,7 +43,7 @@ namespace SeaWar.Client
             });
         }
 
-        public Task<GameFireResponse> FireAsync(Guid roomId, Guid playerId, CellPosition firedCell)
+        public Task<GameFireResponse> FireAsync(FireParameters parameters)
         {
             return Task.FromResult(new GameFireResponse()
             {
