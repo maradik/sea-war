@@ -10,6 +10,20 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Xamarin.Forms" Version="3.3.0.912540"/>
+        <PackageReference Include="Xamarin.Forms" Version="3.3.0.912540" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Update="View\WelcomePage.xaml">
+        <SubType>Designer</SubType>
+        <Generator></Generator>
+      </EmbeddedResource>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="View\WelcomePage.xaml.cs">
+        <DependentUpon>WelcomePage.xaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
     </ItemGroup>
 </Project>
