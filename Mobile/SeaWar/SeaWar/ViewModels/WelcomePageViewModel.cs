@@ -13,7 +13,7 @@ namespace SeaWar.ViewModels
     public class WelcomePageModelView : INotifyPropertyChanged, IUseValidation
     {
         private readonly IClient client;
-        
+
         private const int minUserNameLength = 5;
         private const string validateMessage = "Имя игрока должно быть не меньше 5 символов";
         public event PropertyChangedEventHandler PropertyChanged;
@@ -21,7 +21,7 @@ namespace SeaWar.ViewModels
         private string _playerName;
         private bool isValid;
         private string errorMessage;
-        
+
         public string PlayerName
         {
             get => _playerName;
@@ -57,22 +57,26 @@ namespace SeaWar.ViewModels
         public WelcomePageModelView(GameModel gameModel, WaitGamePage waitGamePage, GamePage gamePage, IClient client)
         {
             this.client = client;
-            
+
             StartGame = new Command(async _ =>
             {
-                var createRoomResponse = await client.CreateRoomAsync(PlayerName);
+                var parameters = new CreateRoomParameters
+                {
+                    PlayerName = PlayerName
+                };
+                var createRoomResponse = await client.CreateRoomAsync(parameters);
                 gameModel.PlayerName = PlayerName;
                 gameModel.PlayerId = createRoomResponse.PlayerId;
                 gameModel.RoomId = createRoomResponse.RoomId;
                 gameModel.AnotherPlayerName = createRoomResponse.AnotherPlayerName;
-                
+
                 if (createRoomResponse.Status == CreateRoomStatus.ReadyForStart)
                 {
-                    await Application.Current.MainPage.Navigation.PushAsync(gamePage);
+                    await Application.Current.MainPage.Navigation.PushModalAsync(gamePage);
                 }
                 else
                 {
-                    await Application.Current.MainPage.Navigation.PushAsync(waitGamePage);
+                    await Application.Current.MainPage.Navigation.PushModalAsync(waitGamePage);
                 }
             });
         }

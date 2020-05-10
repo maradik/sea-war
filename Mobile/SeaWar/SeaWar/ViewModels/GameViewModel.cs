@@ -20,7 +20,7 @@ namespace SeaWar.ViewModels
         private string formattedStatus;
         private string formattedTimeoutRemain;
         private readonly GameModel gameModel;
-        
+
         public GameViewModel(IClient client, GameModel gameModel)
         {
             this.client = client;
@@ -64,7 +64,13 @@ namespace SeaWar.ViewModels
         {
             //TODO Задизейблить контролы
             fireTimeoutTimer.Stop();
-            var fireResult = await client.FireAsync(gameModel.RoomId, gameModel.PlayerId, new CellPosition(x, y));
+            var parameters = new FireParameters
+            {
+                RoomId = gameModel.RoomId,
+                PlayerId = gameModel.PlayerId,
+                FieredCell = new CellPosition(x, y)
+            };
+            var fireResult = await client.FireAsync(parameters);
             OpponentMap = fireResult.OpponentMap.ToModel();
 
             //ToDo redraw
@@ -75,7 +81,12 @@ namespace SeaWar.ViewModels
         {
             while (true)
             {
-                var gameStatus = await client.GetGameStatusAsync(gameModel.RoomId, gameModel.PlayerId);
+                var parameters = new GetGameStatusParameters
+                {
+                    RoomId = gameModel.RoomId,
+                    PlayerId = gameModel.PlayerId
+                };
+                var gameStatus = await client.GetGameStatusAsync(parameters);
 
                 switch (gameStatus.GameStatus)
                 {

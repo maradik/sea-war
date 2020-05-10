@@ -6,29 +6,36 @@ namespace SeaWar.Client
 {
     public class FakeClient : IClient
     {
-        public Task<RoomResponse> CreateRoomAsync(string playerName)
+        private int countTryReadyToPlay;
+
+        public Task<RoomResponse> CreateRoomAsync(CreateRoomParameters parameters)
         {
             return Task.FromResult(new RoomResponse()
             {
-                Status = CreateRoomStatus.ReadyForStart,
+                Status = CreateRoomStatus.WaitingForAnotherPlayer,
                 PlayerId = Guid.NewGuid(),
                 RoomId = Guid.NewGuid(),
                 AnotherPlayerName = nameof(RoomResponse.AnotherPlayerName)
             });
         }
 
-        public Task<RoomResponse> GetRoomStatusAsync(Guid roomId, Guid playerId)
+        public Task<RoomResponse> GetRoomStatusAsync(GetRoomStatusParameters parameters)
         {
+            countTryReadyToPlay++;
+            var status = countTryReadyToPlay > 3
+                ? CreateRoomStatus.ReadyForStart
+                : CreateRoomStatus.WaitingForAnotherPlayer;
+            
             return Task.FromResult(new RoomResponse()
             {
-                Status = CreateRoomStatus.ReadyForStart,
-                PlayerId = playerId,
-                RoomId = roomId,
+                Status = status,
+                PlayerId = parameters.PlayerId,
+                RoomId = parameters.RoomId,
                 AnotherPlayerName = nameof(RoomResponse.AnotherPlayerName)
             });
         }
 
-        public Task<GameStatusResponse> GetGameStatusAsync(Guid roomId, Guid playerId)
+        public Task<GameStatusResponse> GetGameStatusAsync(GetGameStatusParameters parameters)
         {
             return Task.FromResult(new GameStatusResponse()
             {
@@ -36,7 +43,7 @@ namespace SeaWar.Client
             });
         }
 
-        public Task<GameFireResponse> FireAsync(Guid roomId, Guid playerId, CellPosition firedCell)
+        public Task<GameFireResponse> FireAsync(FireParameters parameters)
         {
             return Task.FromResult(new GameFireResponse()
             {
