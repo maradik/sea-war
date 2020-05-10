@@ -1,27 +1,33 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using SeaWar.Annotations;
+using SeaWar.Client;
+using SeaWar.Contracts;
+using SeaWar.Model;
+using SeaWar.View;
 using Xamarin.Forms;
 
 namespace SeaWar.ViewModel
 {
     public class WelcomePageModelView : INotifyPropertyChanged, IUseValidation
     {
+        private readonly IClient client;
+        
         private const int minUserNameLength = 5;
         private const string validateMessage = "Имя игрока должно быть не меньше 5 символов";
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private string userName;
+        private string _playerName;
         private bool isValid;
         private string errorMessage;
         
-        public string UserName
+        public string PlayerName
         {
-            get => userName;
+            get => _playerName;
             set
             {
-                userName = value;
-                OnPropertyChanged(nameof(UserName));
+                _playerName = value;
+                OnPropertyChanged(nameof(PlayerName));
             }
         }
 
@@ -47,15 +53,36 @@ namespace SeaWar.ViewModel
 
         public Command StartGame { get; }
 
-        public WelcomePageModelView()
+        public WelcomePageModelView(IClient client)
         {
+            this.client = client;
+            
             StartGame = new Command(async _ =>
             {
-                var mainPage = new MainPage();
-                await Application.Current.MainPage.Navigation.PushAsync(mainPage);
+                var createRoomResponse = await client.CreateRoomAsync(PlayerName);
+                var gameModel = new GameModel()
+                {
+                    PlayerName = PlayerName,
+                    PlayerId = createRoomResponse.PlayerId,
+                    RoomId = createRoomResponse.RoomId,
+                    AnotherPlayerName = createRoomResponse.AnotherPlayerName
+                };
+                
+                if (createRoomResponse.Status == CreateRoomStatus.ReadyForStart)
+                {
+                    var mainPage = new MainPage();
+                    await Application.Current.MainPage.Navigation.PushAsync(mainPage);
+                }
+                else
+                {
+                    var waitGamePageViewModel = new WaitGamePageViewModel(client, gameModel);
+                    var waitPage = new WaitGamePage();
+                    waitPage.BindingContext = waitGamePageViewModel;
+                    await Application.Current.MainPage.Navigation.PushAsync(waitPage);
+                }
             });
         }
-        
+
         [NotifyPropertyChangedInvocator]
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
@@ -64,7 +91,7 @@ namespace SeaWar.ViewModel
 
         private bool IsEmptyOrSmall()
         {
-            return string.IsNullOrEmpty(UserName) || UserName.Length < minUserNameLength;
+            return string.IsNullOrEmpty(PlayerName) || PlayerName.Length < minUserNameLength;
         }
 
         void IUseValidation.Validate()

@@ -18,12 +18,19 @@
         <SubType>Designer</SubType>
         <Generator></Generator>
       </EmbeddedResource>
+      <EmbeddedResource Update="View\WaitGamePage.xaml">
+        <SubType>Designer</SubType>
+        <Generator></Generator>
+      </EmbeddedResource>
     </ItemGroup>
 
     <ItemGroup>
       <Compile Update="View\WelcomePage.xaml.cs">
         <DependentUpon>WelcomePage.xaml</DependentUpon>
         <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="View\WaitGamePage.xaml.cs">
+        <DependentUpon>WaitGamePage.xaml</DependentUpon>
       </Compile>
     </ItemGroup>
 </Project>

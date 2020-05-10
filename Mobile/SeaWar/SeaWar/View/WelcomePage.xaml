@@ -10,7 +10,7 @@
     <ContentPage.Content>
         <StackLayout>
             <Label Text="Имя игрока" />
-            <Entry Text="{Binding UserName}">
+            <Entry Text="{Binding PlayerName}">
                 <Entry.Behaviors>
                     <local:EmptyValidationBehavior />
                 </Entry.Behaviors>
