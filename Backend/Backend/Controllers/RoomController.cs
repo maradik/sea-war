@@ -40,7 +40,7 @@ namespace Backend.Controllers
 
         [HttpGet]
         [Route("room/{roomId}/getStatus")]
-        public IActionResult GetStatus([FromRoute] Guid roomId, [FromQuery] Guid userId) =>
-            Ok(roomManager.GetStatus(roomId, userId));
+        public IActionResult GetStatus([FromRoute] Guid roomId, [FromQuery] Guid playerId) =>
+            Ok(roomManager.GetStatus(roomId, playerId));
     }
 }
