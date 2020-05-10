@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:SeaWar.ViewModel"
+             x:Class="SeaWar.WelcomePage">
+    <ContentPage.BindingContext>
+        <local:WelcomePageModelView />
+    </ContentPage.BindingContext>
+    <ContentPage.Content>
+        <StackLayout>
+            <Label Text="Имя игрока"
+                   VerticalOptions="CenterAndExpand"
+                   HorizontalOptions="CenterAndExpand" />
+            <Entry Text="{Binding UserName}"/>
+            <Button Text="Начать игру" Command="{Binding StartGame}"/>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>
