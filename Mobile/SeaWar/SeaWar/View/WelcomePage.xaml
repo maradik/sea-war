@@ -3,9 +3,10 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:SeaWar.ViewModel"
+             xmlns:viewModels="clr-namespace:SeaWar.ViewModels;assembly=SeaWar"
              x:Class="SeaWar.WelcomePage">
     <ContentPage.BindingContext>
-        <local:WelcomePageModelView />
+        <viewModels:WelcomePageModelView />
     </ContentPage.BindingContext>
     <ContentPage.Content>
         <StackLayout>

@@ -16,9 +16,13 @@ namespace SeaWar.ViewModels
         private string formattedStatus;
         private string formattedTimeoutRemain;
         private TimeSpan timeoutRemain;
-
-        public GameViewModel(IClient client) =>
+        private readonly GameModel gameModel;
+        
+        public GameViewModel(IClient client, GameModel gameModel)
+        {
             this.client = client;
+            this.gameModel = gameModel;
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 

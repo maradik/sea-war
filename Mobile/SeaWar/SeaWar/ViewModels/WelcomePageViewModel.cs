@@ -2,12 +2,12 @@
 using System.Runtime.CompilerServices;
 using SeaWar.Annotations;
 using SeaWar.Client;
-using SeaWar.Contracts;
-using SeaWar.Model;
+using SeaWar.Client.Contracts;
 using SeaWar.View;
+using SeaWar.ViewModel;
 using Xamarin.Forms;
 
-namespace SeaWar.ViewModel
+namespace SeaWar.ViewModels
 {
     public class WelcomePageModelView : INotifyPropertyChanged, IUseValidation
     {
@@ -70,14 +70,18 @@ namespace SeaWar.ViewModel
                 
                 if (createRoomResponse.Status == CreateRoomStatus.ReadyForStart)
                 {
-                    var mainPage = new MainPage();
+                    var mainPage = new MainPage
+                    {
+                        BindingContext = new GameViewModel(client, gameModel)
+                    };
                     await Application.Current.MainPage.Navigation.PushAsync(mainPage);
                 }
                 else
                 {
-                    var waitGamePageViewModel = new WaitGamePageViewModel(client, gameModel);
-                    var waitPage = new WaitGamePage();
-                    waitPage.BindingContext = waitGamePageViewModel;
+                    var waitPage = new WaitGamePage
+                    {
+                        BindingContext = new WaitGamePageViewModel(client, gameModel)
+                    };
                     await Application.Current.MainPage.Navigation.PushAsync(waitPage);
                 }
             });

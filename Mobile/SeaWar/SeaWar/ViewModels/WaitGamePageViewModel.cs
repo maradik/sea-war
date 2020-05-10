@@ -1,11 +1,7 @@
-﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
-using SeaWar.Annotations;
+﻿using System.Threading.Tasks;
 using SeaWar.Client;
-using SeaWar.Model;
 
-namespace SeaWar.ViewModel
+namespace SeaWar.ViewModels
 {
     public class WaitGamePageViewModel
     {
