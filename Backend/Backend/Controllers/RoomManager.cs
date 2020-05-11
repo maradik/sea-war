@@ -47,11 +47,7 @@ namespace Backend.Controllers
             lock (rooms)
             {
                 var room = rooms[roomId];
-                if (room.Player2 == null)
-                {
-                    //
-                    return null;
-                }
+
 
                 var gameStatus = room.CurrentPlayerId == playerId ? GameStatus.YourChoice : GameStatus.PendingForFriendChoice;
 
