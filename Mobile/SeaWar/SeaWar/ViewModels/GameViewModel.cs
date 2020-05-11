@@ -68,7 +68,7 @@ namespace SeaWar.ViewModels
             this.client = client;
             this.gameModel = gameModel;
             this.createFinishPage = createFinishPage;
-                fireTimeout, RandomFireAsync, SetOpponentChoiceFormattedStatusAsync);
+            fireTimeoutTimer = new PeriodicalTimer(TimeSpan.FromSeconds(1), UpdateYourChoiceFormattedStatusAsync, fireTimeout, RandomFireAsync, SetOpponentChoiceFormattedStatusAsync);
             OpponentMap = Map.Empty;
             Task.Run(async () => await GetStatusAsync());
             SetOpponentChoiceFormattedStatusAsync();
