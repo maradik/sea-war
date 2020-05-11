@@ -1,4 +1,5 @@
-﻿using Autofac;
+﻿using System;
+using Autofac;
 using SeaWar.Client;
 using SeaWar.View;
 using SeaWar.ViewModels;
@@ -9,11 +10,15 @@ namespace SeaWar
     {
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterType<FakeClient>().As<IClient>().SingleInstance();
-            // builder.RegisterType<Client.Client>()
-            //        .As<IClient>()
-            //        .WithParameter("baseUri", Settings.ServerUri)
-            //        .SingleInstance();
+            // builder.RegisterType<FakeClient>().As<IClient>().SingleInstance();
+            builder.RegisterType<RetryableClient>()
+                   .As<IClient>()
+                   .WithParameters(new []
+                   {
+                       new NamedParameter("client", new Client.Client(Settings.ServerUri, Settings.Timeout)),
+                       new NamedParameter("retryCount", 5)
+                   })
+                   .SingleInstance();
 
             builder.RegisterType<WelcomePage>().AsSelf();
             builder.RegisterType<WelcomePageModelView>().AsSelf();
