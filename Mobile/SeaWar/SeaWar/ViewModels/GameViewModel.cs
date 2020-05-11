@@ -71,7 +71,7 @@ namespace SeaWar.ViewModels
         {
             //TODO Задизейблить контролы
             await fireTimeoutTimer.Stop();
-            
+
             //TODO нужно "запретить" стрелять по клетке, по которой уже стрелял
             var parameters = new FireParameters
             {
@@ -132,7 +132,7 @@ namespace SeaWar.ViewModels
             //TODO нужно "запретить" стрелять по клетке, по которой уже стрелял
             var x = random.Next(OpponentMap.Cells.GetLength(0));
             var y = random.Next(OpponentMap.Cells.GetLength(1));
-            
+
             await FireAsync(x, y);
         }
 
