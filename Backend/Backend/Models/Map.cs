@@ -19,10 +19,13 @@ namespace Backend.Models
             {
                 for (var j = -1; j <= 1; ++j)
                 {
+                    if (i == 0 && j == 0)
+                        continue;
                     if (cell.X + i >= 0 && cell.X + i < 10 && cell.Y + j >= 0 && cell.Y < 10)
                         result.Add(Cells[cell.Y + j, cell.X + i]);
                 }
             }
+
             return result.ToArray();
         }
 
@@ -41,11 +44,13 @@ namespace Backend.Models
         public void DismissShipNeighbours(int x, int y)
         {
             var ship = GetShip(x, y);
-            foreach (var cell in ship.Cells)
+            var allNeighbours = ship.Cells
+                                    .SelectMany(GetCellNeighbours)
+                                    .Where(neighbour => !ship.ContainsCell(neighbour.X, neighbour.Y));
+
+            foreach (var neighbour in allNeighbours)
             {
-                var cellNeighbours = GetCellNeighbours(cell).Where(neighbour => ship.ContainsCell(neighbour.X, neighbour.Y));
-                foreach (var cellNeighbour in cellNeighbours)
-                    Cells[cellNeighbour.Y, cell.X].Status = CellStatus.ShipNeighbour;
+                Cells[neighbour.Y, neighbour.X].Status = CellStatus.ShipNeighbour;
             }
         }
 

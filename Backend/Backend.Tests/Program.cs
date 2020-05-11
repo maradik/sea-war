@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using Backend.Models;
+using NUnit.Framework;
 
 namespace Backend.Tests
 {
@@ -8,21 +9,16 @@ namespace Backend.Tests
         [Test]
         public void Test()
         {
-            /*var result = new ShipsPositionBuilder(new MapBuilder()).Build();
+            var map = new Map();
+            map.Cells = new Cell[10, 10];
             for (var i = 0; i < 10; ++i)
             {
                 for (var j = 0; j < 10; ++j)
                 {
-                    if (result.Cells[i, j].Status == CellStatus.Empty)
-                        Console.Write("* ");
-                    else if (result.Cells[i, j].Status == CellStatus.ShipNeighbour)
-                        Console.Write("- ");
-                    else if (result.Cells[i, j].Status == CellStatus.EngagedByShip)
-                        Console.Write("+ ");
+                    map.Cells[i, j] = new Cell {X = i, Y = j};
                 }
-
-                Console.WriteLine();
-            }*/
+            }
+            var result = map.GetCellNeighbours(new Cell {X = 1, Y = 1});
         }
     }
 }
