@@ -21,7 +21,7 @@ namespace Backend.Models
                 {
                     if (i == 0 && j == 0)
                         continue;
-                    if (cell.X + i >= 0 && cell.X + i < 10 && cell.Y + j >= 0 && cell.Y < 10)
+                    if (cell.X + i >= 0 && cell.X + i < 10 && cell.Y + j >= 0 && cell.Y + j < 10)
                         result.Add(Cells[cell.Y + j, cell.X + i]);
                 }
             }
