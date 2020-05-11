@@ -27,6 +27,8 @@ namespace Backend.Managers
                 {
                     cells[i, j] = new Cell
                     {
+                        X = j,
+                        Y = i,
                         Status = CellStatus.Empty
                     };
                 }
