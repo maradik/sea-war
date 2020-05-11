@@ -1,4 +1,5 @@
 using Backend.Controllers;
+using Backend.Managers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -22,6 +23,8 @@ namespace Backend
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<GameManager>();
+            services.AddSingleton<RoomManager>();
+            services.AddTransient<RoomCreator>();
             services.AddTransient<PlayerBuilder>();
             services.AddTransient<MapBuilder>();
             services.AddControllers().AddNewtonsoftJson(options =>

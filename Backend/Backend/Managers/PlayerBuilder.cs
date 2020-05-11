@@ -1,7 +1,7 @@
 using System;
 using Backend.Models;
 
-namespace Backend.Controllers
+namespace Backend.Managers
 {
     public class PlayerBuilder
     {

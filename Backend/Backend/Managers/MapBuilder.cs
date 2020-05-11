@@ -1,8 +1,7 @@
-using System;
 using System.Collections.Generic;
 using Backend.Models;
 
-namespace Backend.Controllers
+namespace Backend.Managers
 {
     public class MapBuilder
     {
@@ -67,10 +66,10 @@ namespace Backend.Controllers
             {
                 for (var j = 0; j < 10; ++j)
                 {
-                    var cells = new List<Point>();
+                    var cells = new List<Cell>();
                     for (var k = 0; k < size; ++k)
                     {
-                        cells.Add(new Point {X = i + k, Y = j});
+                        cells.Add(new Cell {X = i + k, Y = j});
                     }
                     result.Add(new Ship {Cells = cells.ToArray()});
                 }
@@ -79,10 +78,10 @@ namespace Backend.Controllers
             {
                 for (var j = 0; j <= 10 - size; ++j)
                 {
-                    var cells = new List<Point>();
+                    var cells = new List<Cell>();
                     for (var k = 0; k < size; ++k)
                     {
-                        cells.Add(new Point {X = i, Y = j + k});
+                        cells.Add(new Cell {X = i, Y = j + k});
                     }
                     result.Add(new Ship {Cells = cells.ToArray()});
                 }

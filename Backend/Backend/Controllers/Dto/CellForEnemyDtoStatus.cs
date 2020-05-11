@@ -1,8 +1,8 @@
-namespace Backend.Controllers
+namespace Backend.Controllers.Dto
 {
     public enum CellForEnemyDtoStatus
     {
-        Empty = 0,
+        Unknown = 0,
         Missed = 1,
         Damaged = 2
     }

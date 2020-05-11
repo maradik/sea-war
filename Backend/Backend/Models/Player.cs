@@ -1,4 +1,5 @@
 using System;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Backend.Models
 {
@@ -8,19 +9,27 @@ namespace Backend.Models
         public string Name { get; set; }
         public Map OwnMap { get; set; }
 
-        public CellStatus ProcessEnemyMove(int x, int y)
+        public bool AnyShipsAlive() =>
+            OwnMap.HasAliveShip();
+
+        public FireResult ProcessEnemyMove(int x, int y)
         {
-            if (OwnMap.Cells[y, x].Status == CellStatus.Empty)
+            if (OwnMap.HasShip(x, y))
             {
-                OwnMap.Cells[y, x].Status = CellStatus.EmptyFired;
-                return CellStatus.EmptyFired;
+                var ship = OwnMap.GetShip(x, y);
+                ship.Damage(x, y);
+
+                var shipStatus = ship.Status == ShipStatus.Alive ? FireResult.Damaged : FireResult.Killed;
+                if (shipStatus == FireResult.Killed)
+                {
+                    OwnMap.DismissShipNeighbours(x, y);
+                }
+
+                return shipStatus;
             }
 
-            if (OwnMap.Cells[y, x].Status == CellStatus.EngagedByShip)
-            {
-                OwnMap.Cells[y, x].Status = CellStatus.EngagedByShipFired;
-                return CellStatus.EngagedByShipFired;
-            }
+            if (OwnMap.IsEmpty(x, y))
+                return FireResult.Missed;
 
             throw new ArgumentException("Incorrect move");
         }

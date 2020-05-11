@@ -1,4 +1,4 @@
-namespace Backend.Controllers
+namespace Backend.Controllers.Dto
 {
     public class CreateRoomRequestDto
     {

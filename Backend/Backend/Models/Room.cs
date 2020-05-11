@@ -1,5 +1,6 @@
 using System;
-using Backend.Controllers;
+using Backend.Controllers.Dto;
+using Backend.Managers;
 
 namespace Backend.Models
 {
@@ -52,22 +53,13 @@ namespace Backend.Models
 
         public FireResponseDto Fire(FireRequestDto dto, Guid playerId)
         {
-            var enemyPlayer = Player1.Id == playerId ? Player2 : Player1;
-            var moveResult = enemyPlayer.ProcessEnemyMove(dto.X, dto.Y) == CellStatus.EngagedByShipFired;
-            CurrentPlayerId = moveResult
+            var enemyPlayer = GetEnemyPlayer(playerId);
+            var fireResult = enemyPlayer.ProcessEnemyMove(dto.X, dto.Y);
+            CurrentPlayerId = fireResult != FireResult.Missed
                 ? playerId
                 : enemyPlayer.Id;
-            var gameFinished = true;
-            foreach (var cell in enemyPlayer.OwnMap.Cells)
-            {
-                if (cell.Status == CellStatus.EngagedByShip)
-                {
-                    gameFinished = false;
-                    break;
-                }
-            }
 
-            GameFinished = gameFinished;
+            GameFinished = !enemyPlayer.AnyShipsAlive();
             return new FireResponseDto
             {
                 EnemyMap = enemyPlayer.OwnMap.ToMapForEnemyDto()
@@ -80,7 +72,7 @@ namespace Backend.Models
                 PlayerId = playerId,
                 RoomId = Id,
                 RoomStatus = Status,
-                AnotherPlayerName = Player1.Id == playerId ? Player2.Name : Player1.Name
+                AnotherPlayerName = GetEnemyPlayer(playerId).Name
             };
 
         public GetGameStatusResponseDto GetGameStatus(Guid playerId)
@@ -93,7 +85,7 @@ namespace Backend.Models
             return new GetGameStatusResponseDto
             {
                 YourChoiceTimeout = gameStatus == GameStatus.YourChoice ? TimeSpan.FromSeconds(30) : TimeSpan.Zero,
-                MyMap = Player1.Id == playerId ? Player1.OwnMap.ToMapDto() : Player2.OwnMap.ToMapDto(),
+                MyMap = GetMyPlayer(playerId).OwnMap.ToMapDto(),
                 GameStatus = gameStatus,
                 FinishReason = gameStatus == GameStatus.Finish
                     ? CurrentPlayerId == playerId
@@ -102,5 +94,11 @@ namespace Backend.Models
                     : (FinishReason?) null
             };
         }
+
+        private Player GetEnemyPlayer(Guid playerId) =>
+            Player1.Id == playerId ? Player2 : Player1;
+
+        private Player GetMyPlayer(Guid playerId) =>
+            Player1.Id == playerId ? Player1 : Player2;
     }
 }

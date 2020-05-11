@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Backend.Controllers.Dto;
 using Backend.Models;
 
-namespace Backend.Controllers
+namespace Backend.Managers
 {
     public class RoomManager
     {
@@ -16,9 +17,10 @@ namespace Backend.Controllers
 
         public Room GetRoom(Guid roomId)
         {
-            lock (rooms)
+            var room = rooms[roomId];
+            lock (room)
             {
-                return rooms[roomId];
+                return room;
             }
         }
 

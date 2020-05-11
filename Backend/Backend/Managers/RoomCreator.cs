@@ -1,7 +1,8 @@
 using System;
+using Backend.Controllers.Dto;
 using Backend.Models;
 
-namespace Backend.Controllers
+namespace Backend.Managers
 {
     public class RoomCreator
     {

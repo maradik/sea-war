@@ -1,6 +1,4 @@
-using Backend.Models;
-
-namespace Backend.Controllers
+namespace Backend.Controllers.Dto
 {
     public class FireResponseDto
     {

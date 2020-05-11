@@ -1,6 +1,7 @@
 using System;
+using Backend.Controllers.Dto;
 
-namespace Backend.Controllers
+namespace Backend.Managers
 {
     public class GameManager
     {

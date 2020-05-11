@@ -1,4 +1,4 @@
-namespace Backend.Controllers
+namespace Backend.Models
 {
     public enum FinishReason
     {
