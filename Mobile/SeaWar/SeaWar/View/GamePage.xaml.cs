@@ -1,5 +1,5 @@
 ﻿using System;
-using SeaWar.Client.Contracts;
+using System.ComponentModel;
 using SeaWar.DomainModels;
 using SeaWar.ViewModels;
 using Xamarin.Forms;
@@ -13,39 +13,26 @@ namespace SeaWar.View
             InitializeComponent();
             BindingContext = createViewModel(model);
         }
-        
-        private void InitGrid(Grid grid)
-        {
-            for (int i = 0; i < 10; i++)
-            {
-                for (int j = 0; j < 10; j++)
-                {
-                    var image = new Image()
-                    {
-                        Source = "empty_cell.jpg"
-                    };
 
-                    var tapGestureRecognizer = new TapGestureRecognizer();
-                    var cellPosition = new CellPosition(i, j);
-                    tapGestureRecognizer.Tapped += (s, e) => {
-                        // handle the tap
-                        var x = cellPosition.X;
-                        var y = cellPosition.Y;
-                        var tapImage = (Image)s;
-                        tapImage.Source = ImageSource.FromFile("miss_cell.jpg");
-                        int a = 10;
-                    };
-                    image.GestureRecognizers.Add(tapGestureRecognizer);
-                    grid.Children.Add(image,i,j);
-                }
-            }
-        }
+        GameViewModel Model =>  (BindingContext as GameViewModel);      
         
         protected override void OnAppearing()
         {
             base.OnAppearing();
-            InitGrid(PlayerGrid);
-            InitGrid(AnotherPlayerGrid);
+            Model.InitGrid(PlayerGrid, false);;
+            Model.InitGrid(AnotherPlayerGrid, true);
+            Model.UpdateGrid(PlayerGrid, Model.MyMap);
+
+            var notifyPropertyChanged = Model as INotifyPropertyChanged;
+            notifyPropertyChanged.PropertyChanged += NotifyPropertyChangedOnPropertyChanged;
+        }
+
+        private void NotifyPropertyChangedOnPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Model.OpponentMap))
+            {
+                Model.UpdateGrid(AnotherPlayerGrid, Model.OpponentMap);    
+            }
         }
     }
 }

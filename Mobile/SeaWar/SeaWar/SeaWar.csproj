@@ -51,7 +51,7 @@
       <None Update="Images\miss_cell.jpg">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
-      <None Update="Images\ship.jpg">
+      <None Update="Images\ship_cell.jpg">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
       <None Update="Images\killed.jpg">

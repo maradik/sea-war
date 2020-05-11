@@ -6,6 +6,7 @@ using SeaWar.Client;
 using SeaWar.Client.Contracts;
 using SeaWar.DomainModels;
 using SeaWar.Extensions;
+using Xamarin.Forms;
 
 namespace SeaWar.ViewModels
 {
@@ -15,6 +16,11 @@ namespace SeaWar.ViewModels
         private static readonly TimeSpan fireTimeout = TimeSpan.FromSeconds(15);
         private static readonly TimeSpan periodOfStatusPolling = TimeSpan.FromSeconds(1);
 
+        private ImageSource danageImageSource = ImageSource.FromFile("damage.jpg");
+        private ImageSource emptyImageSource = ImageSource.FromFile("empty_cell.jpg");
+        private ImageSource shipImageSource = ImageSource.FromFile("ship_cell.jpg");
+        private ImageSource missImageSource = ImageSource.FromFile("miss_cell.jpg");
+        
         private readonly IClient client;
         private readonly PeriodicalTimer fireTimeoutTimer;
         private string formattedStatus;
@@ -91,7 +97,7 @@ namespace SeaWar.ViewModels
             };
             var fireResult = await client.FireAsync(parameters);
             OpponentMap = fireResult.OpponentMap.ToModel();
-
+            
             //ToDo redraw
             await GetStatusAsync();
         }
@@ -148,6 +154,76 @@ namespace SeaWar.ViewModels
         {
             FormattedTimeoutRemain = String.Empty;
             return Task.CompletedTask;
+        }
+
+        public void InitGrid(Grid grid, bool useTapAction)
+        {
+            for (int i = 0; i < GameModel.MapHorizontalSize; i++)
+            {
+                for (int j = 0; j < GameModel.MapVerticalSize; j++)
+                {
+                    var image = new Image()
+                    {
+                        Source = "empty_cell.jpg"
+                    };
+
+                    var tapGestureRecognizer = new TapGestureRecognizer();
+                    var cellPosition = new CellPosition(i, j);
+
+                    if (useTapAction)
+                    {
+                        tapGestureRecognizer.Tapped += async (sender, eventArgs) =>
+                        {
+                            // handle the tap
+                            var x = cellPosition.X;
+                            var y = cellPosition.Y;
+                            var tapImage = (Image) sender;
+                            tapImage.Source = ImageSource.FromFile("miss_cell.jpg");
+                            
+                            await FireAsync(x,y);
+                        };
+                    }
+
+                    image.GestureRecognizers.Add(tapGestureRecognizer);
+                    grid.Children.Add(image,i,j);
+                }
+            }
+        }
+
+        public void UpdateGrid(Grid grid, Map map)
+        {
+            var cells = map.Cells;
+            for (int i = 0; i < GameModel.MapHorizontalSize; i++)
+            {
+                for (int j = 0; j < GameModel.MapVerticalSize; j++)
+                {
+                    var cell = cells[i, j];
+                    var child = grid.Children[i+j];
+                    var image = (Image) child;
+
+                    var imageSource = emptyImageSource;
+                    switch (cell.Status)
+                    {
+                        case CellStatus.Damaged:
+                            imageSource = danageImageSource;
+                            break;
+                        case CellStatus.Filled:
+                            imageSource = shipImageSource;
+                            break;
+                        case CellStatus.Missed:
+                            imageSource = missImageSource;
+                            break;
+                        default:
+                            imageSource = emptyImageSource;
+                            break;
+                    }
+
+                    if (((FileImageSource) image.Source).File != ((FileImageSource) imageSource).File)
+                    {
+                        image.Source = imageSource;
+                    }
+                }
+            }
         }
     }
 }
