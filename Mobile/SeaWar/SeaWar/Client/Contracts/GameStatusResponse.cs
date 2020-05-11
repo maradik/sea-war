@@ -3,7 +3,7 @@
     public class GameStatusResponse
     {
         public GameStatus GameStatus { get; set; }
-        public FinishReason FinishReason { get; set; }
+        public FinishReason? FinishReason { get; set; }
         public Map MyMap { get; set; }
     }
 }

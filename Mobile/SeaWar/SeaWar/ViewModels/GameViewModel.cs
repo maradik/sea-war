@@ -70,6 +70,7 @@ namespace SeaWar.ViewModels
             this.createFinishPage = createFinishPage;
             fireTimeoutTimer = new PeriodicalTimer(TimeSpan.FromSeconds(1), UpdateYourChoiceFormattedStatusAsync, fireTimeout, RandomFireAsync, SetOpponentChoiceFormattedStatusAsync);
             OpponentMap = Map.Empty;
+            MyMap = Map.Empty;
             Task.Run(async () => await GetStatusAsync());
             SetOpponentChoiceFormattedStatusAsync();
         }
@@ -107,7 +108,7 @@ namespace SeaWar.ViewModels
                 FieredCell = new CellPosition(x, y)
             };
             var fireResult = await client.FireAsync(parameters);
-            OpponentMap = fireResult.OpponentMap.ToModel();
+            OpponentMap = fireResult.EnemyMap.ToModel();
 
             //ToDo redraw
             await GetStatusAsync();

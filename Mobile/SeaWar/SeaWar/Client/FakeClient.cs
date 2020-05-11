@@ -64,20 +64,20 @@ namespace SeaWar.Client
         {
             return Task.FromResult(new GameFireResponse
             {
-                OpponentMap = new Map
+                EnemyMap = new EnemyMap
                 {
                     Cells = new[,]
                     {
-                        {new Cell{Status = Cell.CellStatus.EngagedByShipFired}, new Cell{Status = Cell.CellStatus.EmptyFired}, new Cell{Status = Cell.CellStatus.EmptyFired}, new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-                        {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-                        {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-                        {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-                        {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-                        {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-                        {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-                        {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-                        {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-                        {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
+                        {new EnemyCell{Status = EnemyCellStatus.Damaged}, new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell()},
+                        {new EnemyCell{Status = EnemyCellStatus.Damaged}, new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell()},
+                        {new EnemyCell{Status = EnemyCellStatus.Damaged}, new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell()},
+                        {new EnemyCell{Status = EnemyCellStatus.Damaged}, new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell()},
+                        {new EnemyCell{Status = EnemyCellStatus.Damaged}, new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell()},
+                        {new EnemyCell{Status = EnemyCellStatus.Damaged}, new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell()},
+                        {new EnemyCell{Status = EnemyCellStatus.Damaged}, new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell()},
+                        {new EnemyCell{Status = EnemyCellStatus.Damaged}, new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell()},
+                        {new EnemyCell{Status = EnemyCellStatus.Damaged}, new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell()},
+                        {new EnemyCell{Status = EnemyCellStatus.Damaged}, new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell()},
                     }
                 }
             });
