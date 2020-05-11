@@ -1,108 +1,61 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using Backend.Models;
 
 namespace Backend.Controllers
 {
+    public interface IRoom
+    {
+        public Guid Id { get; set; }
+        public RoomStatus Status { get; set; }
+    }
+
+    public class RoomCreator
+    {
+        public IRoom CreateRoom(CreateRoomRequestDto dto)
+        {
+            return new Room();
+        }
+    }
+
     public class RoomManager
     {
-        private readonly RoomBuilder roomBuilder;
         private readonly PlayerBuilder playerBuilder;
+        private readonly RoomBuilder roomBuilder;
+        private readonly RoomCreator roomCreator;
 
-        private readonly Dictionary<Guid, Room> rooms = new Dictionary<Guid, Room>();
+        private readonly Dictionary<Guid, IRoom> rooms = new Dictionary<Guid, IRoom>();
 
-        public RoomManager(RoomBuilder roomBuilder,
-                           PlayerBuilder playerBuilder)
+        public RoomManager(PlayerBuilder playerBuilder, RoomBuilder roomBuilder, RoomCreator roomCreator)
         {
-            this.roomBuilder = roomBuilder;
             this.playerBuilder = playerBuilder;
+            this.roomBuilder = roomBuilder;
+            this.roomCreator = roomCreator;
         }
 
-        public FireResponseDto Fire(FireRequestDto dto, Guid roomId, Guid playerId)
+        public Room GetRoom(Guid roomId)
         {
             lock (rooms)
             {
-                var room = rooms[roomId];
-                var enemyMap = room.DoMove(playerId, dto.X, dto.Y);
-
-                return new FireResponseDto
-                {
-                    EnemyMap = enemyMap
-                };
+                return (Room)rooms[roomId];
             }
         }
 
-        public GetGameStatusResponseDto GetGameStatus(Guid roomId, Guid playerId)
+        public CreateRoomResponseDto CreateOrEnterRoom(CreateRoomRequestDto requestDto)
         {
             lock (rooms)
             {
-                var room = rooms[roomId];
-
-                var gameStatus = room.GameStatus;
-
-                return new GetGameStatusResponseDto
+                var availableRoom = (Room)(rooms.FirstOrDefault(x => x.Value.Status == RoomStatus.NotReady).Value);
+                if (availableRoom != null)
                 {
-                    YourChoiceTimeout = gameStatus == GameStatus.YourChoice ? TimeSpan.FromMinutes(1) : TimeSpan.Zero,
-                    MyMap = room.Player1.Id == playerId ? room.Player1.OwnMap : room.Player2.OwnMap,
-                    GameStatus = gameStatus,
-                    FinishReason = gameStatus == GameStatus.Finish
-                        ? room.CurrentPlayerId == playerId
-                            ? FinishReason.Winner
-                            : FinishReason.Lost
-                        : (FinishReason?) null
-                };
-            }
-        }
-
-        public GetRoomStatusResponseDto GetStatus(Guid roomId, Guid playerId)
-        {
-            lock (rooms)
-            {
-                var room = rooms[roomId];
-                return new GetRoomStatusResponseDto
-                {
-                    PlayerId = room.Player1.Id,
-                    RoomId = room.Id,
-                    RoomStatus = room.Status,
-                    AnotherPlayerName = room.Player2?.Name
-                };
-            }
-        }
-
-        public CreateRoomResponseDto Create(CreateRoomRequestDto requestDto)
-        {
-            lock (rooms)
-            {
-                if (rooms.Any(x => x.Value.Status == RoomStatus.NotReady))
-                {
-                    var room = rooms.First(x => x.Value.Status == RoomStatus.NotReady).Value;
-                    var player = playerBuilder.Build(requestDto.PlayerName);
-                    room.Player2 = player;
-                    room.Status = RoomStatus.Ready;
-
-                    return new CreateRoomResponseDto
-                    {
-                        PlayerId = player.Id,
-                        RoomId = room.Id,
-                        RoomStatus = RoomStatus.Ready,
-                        AnotherPlayerName = room.Player1.Name
-                    };
+                    return availableRoom.Enter(requestDto);
                 }
-                else
-                {
-                    var player = playerBuilder.Build(requestDto.PlayerName);
-                    var room = roomBuilder.Build(player, null);
-                    rooms[room.Id] = room;
 
-                    return new CreateRoomResponseDto
-                    {
-                        PlayerId = player.Id,
-                        RoomId = room.Id,
-                        RoomStatus = RoomStatus.NotReady,
-                        AnotherPlayerName = null
-                    };
-                }
+                var room = (Room)roomCreator.CreateRoom(requestDto);
+                rooms[room.Id] = room;
+                return room.Enter(requestDto);
             }
         }
     }
