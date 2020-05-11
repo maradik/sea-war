@@ -53,7 +53,7 @@
             </Grid>
         </StackLayout>
 
-        <StackLayout Grid.Column="4" Grid.Row="2" IsEnabled="{Binding DisabledOpponentGrid}" Grid.ColumnSpan="3">
+        <StackLayout Grid.Column="4" Grid.Row="2" IsEnabled="{Binding EnabledOpponentGrid}" Grid.ColumnSpan="3">
             <Grid x:Name="AnotherPlayerGrid" HorizontalOptions="Center">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"></RowDefinition>

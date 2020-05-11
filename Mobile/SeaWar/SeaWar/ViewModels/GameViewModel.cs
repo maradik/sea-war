@@ -31,7 +31,7 @@ namespace SeaWar.ViewModels
 
         private Map myMap;
         private Map opponentMap;
-        private bool disabledOpponentGrid;
+        private bool enabledOpponentGrid;
 
         public Map OpponentMap
         {
@@ -53,13 +53,13 @@ namespace SeaWar.ViewModels
             }
         }
 
-        public bool DisabledOpponentGrid
+        public bool EnabledOpponentGrid
         {
-            get => disabledOpponentGrid;
+            get => enabledOpponentGrid;
             set
             {
-                disabledOpponentGrid = value;
-                OnPropertyChanged(nameof(DisabledOpponentGrid));
+                enabledOpponentGrid = value;
+                OnPropertyChanged(nameof(EnabledOpponentGrid));
             }
         }
         
@@ -97,7 +97,7 @@ namespace SeaWar.ViewModels
 
         private async Task FireAsync(int x, int y)
         {
-            DisabledOpponentGrid = true;
+            EnabledOpponentGrid = false;
             await fireTimeoutTimer.Stop();
 
             //TODO нужно "запретить" стрелять по клетке, по которой уже стрелял
@@ -134,7 +134,7 @@ namespace SeaWar.ViewModels
                 {
                     case GameStatus.YourChoise:
                         await fireTimeoutTimer.Start();
-                        DisabledOpponentGrid = false;
+                        EnabledOpponentGrid = true;
                         return;
                     case GameStatus.PendingForFriendChoise:
                         break;
