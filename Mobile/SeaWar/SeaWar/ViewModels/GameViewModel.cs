@@ -132,11 +132,11 @@ namespace SeaWar.ViewModels
 
                 switch (gameStatus.GameStatus)
                 {
-                    case GameStatus.YourChoise:
+                    case GameStatus.YourChoice:
                         await fireTimeoutTimer.Start();
                         EnabledOpponentGrid = true;
                         return;
-                    case GameStatus.PendingForFriendChoise:
+                    case GameStatus.PendingForFriendChoice:
                         break;
                     case GameStatus.Finish:
                         gameModel.MyMap = MyMap;

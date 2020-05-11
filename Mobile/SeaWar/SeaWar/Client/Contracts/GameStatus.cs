@@ -2,8 +2,8 @@
 {
     public enum GameStatus
     {
-        YourChoise = 0,
-        PendingForFriendChoise = 1,
+        YourChoice = 0,
+        PendingForFriendChoice = 1,
         Finish = 2
     }
 }
