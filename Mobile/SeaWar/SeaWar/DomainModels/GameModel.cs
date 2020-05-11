@@ -1,4 +1,5 @@
 ﻿using System;
+using SeaWar.ViewModels;
 
 namespace SeaWar.DomainModels
 {
@@ -11,5 +12,8 @@ namespace SeaWar.DomainModels
         public string AnotherPlayerName { get; set; }
         public Guid PlayerId { get; set; }
         public Guid RoomId { get; set; }
+        public FinishReason FinishReason { get; set; }
+        public Map MyMap { get; set; }
+        public Map OpponentMap { get; set; }
     }
 }

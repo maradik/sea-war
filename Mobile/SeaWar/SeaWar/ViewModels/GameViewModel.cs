@@ -7,6 +7,7 @@ using SeaWar.Client;
 using SeaWar.Client.Contracts;
 using SeaWar.DomainModels;
 using SeaWar.Extensions;
+using SeaWar.View;
 using Xamarin.Forms;
 
 namespace SeaWar.ViewModels
@@ -26,6 +27,7 @@ namespace SeaWar.ViewModels
         private readonly PeriodicalTimer fireTimeoutTimer;
         private string formattedStatus;
         private readonly GameModel gameModel;
+        private readonly Func<GameModel, FinishPage> createFinishPage;
 
         private Map myMap;
         private Map opponentMap;
@@ -61,11 +63,11 @@ namespace SeaWar.ViewModels
             }
         }
         
-        public GameViewModel(GameModel gameModel, IClient client)
+        public GameViewModel(GameModel gameModel, Func<GameModel, FinishPage> createFinishPage, IClient client)
         {
             this.client = client;
             this.gameModel = gameModel;
-            fireTimeoutTimer = new PeriodicalTimer(TimeSpan.FromSeconds(1), UpdateYourChoiceFormattedStatusAsync,
+            this.createFinishPage = createFinishPage;
                 fireTimeout, RandomFireAsync, SetOpponentChoiceFormattedStatusAsync);
             OpponentMap = Map.Empty;
             Task.Run(async () => await GetStatusAsync());
@@ -136,7 +138,12 @@ namespace SeaWar.ViewModels
                     case GameStatus.PendingForFriendChoise:
                         break;
                     case GameStatus.Finish:
-                        //TODO GoTo Finish screen
+                        gameModel.MyMap = MyMap;
+                        gameModel.OpponentMap = OpponentMap;
+                        gameModel.FinishReason = gameStatus.FinishReason.ToModel();
+                        Device.BeginInvokeOnMainThread(async () => {
+                            await Application.Current.MainPage.Navigation.PushModalAsync(createFinishPage(gameModel));
+                        });
                         return;
                     default:
                         throw new ArgumentOutOfRangeException();

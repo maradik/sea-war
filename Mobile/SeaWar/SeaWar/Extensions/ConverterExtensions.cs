@@ -1,11 +1,12 @@
 ﻿using System;
+using SeaWar.DomainModels;
 using SeaWar.ViewModels;
 
 namespace SeaWar.Extensions
 {
-    public static class MapExtensions
+    public static class ConverterExtensions
     {
-        public static ViewModels.Map ToModel(this Client.Contracts.Map dto)
+        public static Map ToModel(this Client.Contracts.Map dto)
         {
             var xLength = dto.Cells.GetLength(0);
             var yLength = dto.Cells.GetLength(1);
@@ -40,6 +41,15 @@ namespace SeaWar.Extensions
                 Client.Contracts.Cell.CellStatus.EmptyFired => CellStatus.Missed,
                 Client.Contracts.Cell.CellStatus.EngagedByShipFired => CellStatus.Damaged,
                 _ => throw new ArgumentException(nameof(dto))
+            };
+
+        public static FinishReason ToModel(this Client.Contracts.FinishReason dto) =>
+            dto switch
+            {
+                Client.Contracts.FinishReason.ConnectionLost => FinishReason.OpponentConnectionLost,
+                Client.Contracts.FinishReason.Winner => FinishReason.Winner,
+                Client.Contracts.FinishReason.Lost => FinishReason.Lost,
+                _ => throw new Exception()
             };
     }
 }

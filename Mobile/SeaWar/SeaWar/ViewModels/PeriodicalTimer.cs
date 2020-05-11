@@ -30,7 +30,9 @@ namespace SeaWar.ViewModels
 
         public Task Start()
         {
-            Task.Run(async () => await StartInternal());
+            stopCancellationTokenSource?.Cancel();
+            stopCancellationTokenSource = new CancellationTokenSource();
+            Task.Run(async () => await StartInternal(stopCancellationTokenSource.Token));
             return Task.CompletedTask;
         }
 
@@ -41,14 +43,13 @@ namespace SeaWar.ViewModels
             return Task.CompletedTask;
         }
 
-        private async Task StartInternal()
+        private async Task StartInternal(CancellationToken cancellation)
         {
-            stopCancellationTokenSource = new CancellationTokenSource();
             var timeoutCancellation = new CancellationTokenSource(timeout).Token;
             var stopwatch = new Stopwatch();
             stopwatch.Start();
             
-            while (!stopCancellationTokenSource.Token.IsCancellationRequested)
+            while (!cancellation.IsCancellationRequested)
             {
                 if (timeoutCancellation.IsCancellationRequested)
                 {
