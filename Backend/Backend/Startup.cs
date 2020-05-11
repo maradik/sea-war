@@ -23,6 +23,9 @@ namespace Backend
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<RoomManager>();
+            services.AddTransient<RoomBuilder>();
+            services.AddTransient<PlayerBuilder>();
+            services.AddTransient<MapBuilder>();
             services.AddControllers().AddNewtonsoftJson(options =>
             {
                 options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;

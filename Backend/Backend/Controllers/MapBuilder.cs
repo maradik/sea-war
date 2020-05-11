@@ -20,7 +20,11 @@ namespace Backend.Controllers
                 }
             }
 
-            var map = new Map();
+            var map = new Map()
+            {
+                Cells = cells,
+                Ships = Array.Empty<Ship>()
+            };
             GenerateShipPositions(map);
 
             return map;
