@@ -16,6 +16,7 @@ namespace Backend.Models
         public Player Player2 { get; set; }
         public bool GameFinished { get; set; }
         public RoomStatus Status { get; set; }
+        public long LastMoveTicks { get; set; }
         public Guid CurrentPlayerId { get; set; }
 
         public CreateRoomResponseDto Enter(CreateRoomRequestDto requestDto)
@@ -53,6 +54,8 @@ namespace Backend.Models
 
         public FireResponseDto Fire(FireRequestDto dto, Guid playerId)
         {
+            LastMoveTicks = DateTime.Now.Ticks;
+
             var enemyPlayer = GetEnemyPlayer(playerId);
             var fireResult = enemyPlayer.ProcessEnemyMove(dto.X, dto.Y);
             CurrentPlayerId = fireResult != FireResult.Missed
@@ -77,6 +80,19 @@ namespace Backend.Models
 
         public GetGameStatusResponseDto GetGameStatus(Guid playerId)
         {
+            var currentTicks = DateTime.Now.Ticks;
+            if (TimeSpan.FromTicks(currentTicks - LastMoveTicks) > TimeSpan.FromSeconds(60))
+            {
+                GameFinished = true;
+                return new GetGameStatusResponseDto
+                {
+                    FinishReason = FinishReason.ConnectionLost,
+                    GameStatus = GameStatus.Finish,
+                    MyMap = GetMyPlayer(playerId).OwnMap.ToMapDto(),
+                    YourChoiceTimeout = TimeSpan.Zero
+                };
+            }
+
             var gameStatus = GameFinished
                 ? GameStatus.Finish
                 : CurrentPlayerId == playerId
