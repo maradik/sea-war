@@ -1,14 +1,16 @@
-﻿using SeaWar.ViewModels;
+﻿using System;
+using SeaWar.DomainModels;
+using SeaWar.ViewModels;
 using Xamarin.Forms;
 
 namespace SeaWar.View
 {
     public partial class GamePage : ContentPage
     {
-        public GamePage(GameViewModel viewModel)
+        public GamePage(GameModel model, Func<GameModel, GameViewModel> createViewModel)
         {
             InitializeComponent();
-            BindingContext = viewModel;
+            BindingContext = createViewModel(model);
         }
     }
 }

@@ -12,15 +12,15 @@ namespace SeaWar.ViewModels
     {
         private readonly IClient client;
         private readonly GameModel gameModel;
-        private readonly GamePage gamePage;
+        private readonly Func<GameModel, GamePage> createGamePage;
         private Task waitAnotherPlayerTask;
         private int millisecondsForRepeatServerRequest = 2 * 1000;
 
-        public WaitGamePageViewModel(IClient client, GameModel gameModel, GamePage gamePage)
+        public WaitGamePageViewModel(GameModel gameModel, Func<GameModel, GamePage> createGamePage, IClient client)
         {
             this.client = client;
             this.gameModel = gameModel;
-            this.gamePage = gamePage;
+            this.createGamePage = createGamePage;
         }
 
         private async Task WaitGameReadyAsync()
@@ -38,7 +38,7 @@ namespace SeaWar.ViewModels
                     if (getRoomStatusResponse.Status == CreateRoomStatus.ReadyForStart)
                     {
                         Device.BeginInvokeOnMainThread(async () => {
-                            await Application.Current.MainPage.Navigation.PushModalAsync(gamePage);
+                            await Application.Current.MainPage.Navigation.PushModalAsync(createGamePage(gameModel));
                         });
 
                         return;
