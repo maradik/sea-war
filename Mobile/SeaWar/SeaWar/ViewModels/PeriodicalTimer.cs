@@ -39,6 +39,8 @@ namespace SeaWar.ViewModels
             stopCancellationTokenSource = new CancellationTokenSource();
             var cancellationToken = new CancellationTokenSource(timeout).Token;
             var stopwatch = new Stopwatch();
+            stopwatch.Start();
+            
             while (!stopCancellationTokenSource.Token.IsCancellationRequested)
             {
                 if (cancellationToken.IsCancellationRequested)
@@ -47,7 +49,7 @@ namespace SeaWar.ViewModels
                     return;
                 }
 
-                var remain = period - stopwatch.Elapsed;
+                var remain = timeout - stopwatch.Elapsed;
                 if (remain < TimeSpan.Zero)
                 {
                     remain = TimeSpan.Zero;

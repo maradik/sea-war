@@ -12,7 +12,7 @@ namespace SeaWar.ViewModels
     public class GameViewModel : INotifyPropertyChanged
     {
         private static readonly Random random = new Random();
-        private static readonly TimeSpan fireTimeout = TimeSpan.FromSeconds(10);
+        private static readonly TimeSpan fireTimeout = TimeSpan.FromSeconds(20);
         private static readonly TimeSpan periodOfStatusPolling = TimeSpan.FromSeconds(1);
 
         private readonly IClient client;
@@ -130,7 +130,7 @@ namespace SeaWar.ViewModels
 
         private Task UpdateFormattedTimeoutRemainAsync(TimeSpan remain)
         {
-            FormattedTimeoutRemain = remain.ToString();
+            FormattedTimeoutRemain = remain.TotalSeconds.ToString("0");
             return Task.CompletedTask;
         }
 
