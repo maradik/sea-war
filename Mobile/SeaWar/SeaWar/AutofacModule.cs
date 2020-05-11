@@ -10,6 +10,10 @@ namespace SeaWar
         protected override void Load(ContainerBuilder builder)
         {
             builder.RegisterType<FakeClient>().As<IClient>().SingleInstance();
+            // builder.RegisterType<Client.Client>()
+            //        .As<IClient>()
+            //        .WithParameter("baseUri", Settings.ServerUri)
+            //        .SingleInstance();
 
             builder.RegisterType<WelcomePage>().AsSelf();
             builder.RegisterType<WelcomePageModelView>().AsSelf();

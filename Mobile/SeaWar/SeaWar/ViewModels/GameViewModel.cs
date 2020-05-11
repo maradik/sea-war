@@ -24,7 +24,6 @@ namespace SeaWar.ViewModels
         private readonly IClient client;
         private readonly PeriodicalTimer fireTimeoutTimer;
         private string formattedStatus;
-        private string formattedTimeoutRemain;
         private readonly GameModel gameModel;
 
         //TODO Для тестовых целей только!!! Настоящие карты лежат в MyMap и OpponentMap.
@@ -46,9 +45,10 @@ namespace SeaWar.ViewModels
         {
             this.client = client;
             this.gameModel = gameModel;
-            fireTimeoutTimer = new PeriodicalTimer(TimeSpan.FromSeconds(1), UpdateFormattedTimeoutRemainAsync, fireTimeout, RandomFireAsync, ClearFormattedTimeoutRemain);
+            fireTimeoutTimer = new PeriodicalTimer(TimeSpan.FromSeconds(1), UpdateYourChoiceFormattedStatusAsync, fireTimeout, RandomFireAsync, SetOpponentChoiceFormattedStatusAsync);
             OpponentMap = Map.Empty;
             Task.Run(async () => await GetStatusAsync());
+            SetOpponentChoiceFormattedStatusAsync();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -65,16 +65,6 @@ namespace SeaWar.ViewModels
             }
         }
 
-        public string FormattedTimeoutRemain
-        {
-            get => formattedTimeoutRemain;
-            set
-            {
-                formattedTimeoutRemain = value;
-                OnPropertyChanged(nameof(FormattedTimeoutRemain));
-            }
-        }
-
         public Map MyMap { get; set; }
         public Map OpponentMap { get; set; }
 
@@ -87,7 +77,7 @@ namespace SeaWar.ViewModels
         {
             //TODO Задизейблить контролы
             await fireTimeoutTimer.Stop();
-            
+
             //TODO нужно "запретить" стрелять по клетке, по которой уже стрелял
             var parameters = new FireParameters
             {
@@ -111,18 +101,20 @@ namespace SeaWar.ViewModels
                     RoomId = gameModel.RoomId,
                     PlayerId = gameModel.PlayerId
                 };
+
                 var gameStatus = await client.GetGameStatusAsync(parameters);
+                if (gameStatus.MyMap != null)
+                {
+                    MyMap = gameStatus.MyMap.ToModel();
+                }
 
                 switch (gameStatus.GameStatus)
                 {
                     case GameStatus.YourChoise:
-                        MyMap = gameStatus.MyMap.ToModel();
-                        FormattedStatus = "Твой ход";
                         await fireTimeoutTimer.Start();
                         //TODO Раздизейблить контролы
                         return;
                     case GameStatus.PendingForFriendChoise:
-                        FormattedStatus = "Ход соперника";
                         break;
                     case GameStatus.Finish:
                         //TODO GoTo Finish screen
@@ -135,9 +127,9 @@ namespace SeaWar.ViewModels
             }
         }
 
-        private Task UpdateFormattedTimeoutRemainAsync(TimeSpan remain)
+        private Task UpdateYourChoiceFormattedStatusAsync(TimeSpan remain)
         {
-            FormattedTimeoutRemain = remain.TotalSeconds.ToString("0");
+            FormattedStatus = $"Ходи {remain.TotalSeconds.ToString("0")}";
             return Task.CompletedTask;
         }
 
@@ -146,13 +138,13 @@ namespace SeaWar.ViewModels
             //TODO нужно "запретить" стрелять по клетке, по которой уже стрелял
             var x = random.Next(OpponentMap.Cells.GetLength(0));
             var y = random.Next(OpponentMap.Cells.GetLength(1));
-            
+
             await FireAsync(x, y);
         }
 
-        private Task ClearFormattedTimeoutRemain()
+        private Task SetOpponentChoiceFormattedStatusAsync()
         {
-            FormattedTimeoutRemain = String.Empty;
+            FormattedStatus = "Ход соперника";
             return Task.CompletedTask;
         }
 
