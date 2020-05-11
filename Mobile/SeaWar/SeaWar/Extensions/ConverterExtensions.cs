@@ -83,7 +83,7 @@ namespace SeaWar.Extensions
                 _ => throw new ArgumentException()
             };
 
-        public static FinishReason ToModel(this Client.Contracts.FinishReason dto) =>
+        public static FinishReason ToModel(this Client.Contracts.FinishReason? dto) =>
             dto switch
             {
                 Client.Contracts.FinishReason.ConnectionLost => FinishReason.OpponentConnectionLost,
