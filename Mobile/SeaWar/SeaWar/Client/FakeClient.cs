@@ -40,7 +40,7 @@ namespace SeaWar.Client
         {
             return Task.FromResult(new GameStatusResponse
             {
-                GameStatus = GameStatus.YourChoise, //(GameStatus) random.Next(2),
+                GameStatus = (GameStatus) random.Next(2),
                 MyMap = new Map 
                 {
                     Cells = new[,]
