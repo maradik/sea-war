@@ -1,4 +1,5 @@
 ﻿using System;
+using SeaWar.Client.Contracts;
 using SeaWar.DomainModels;
 using SeaWar.ViewModels;
 using Xamarin.Forms;
@@ -25,11 +26,13 @@ namespace SeaWar.View
                     {
                         Source = "empty_cell.jpg"
                     };
-                    
+
                     var tapGestureRecognizer = new TapGestureRecognizer();
+                    var cellPosition = new CellPosition(i, j);
                     tapGestureRecognizer.Tapped += (s, e) => {
                         // handle the tap
-
+                        var x = cellPosition.X;
+                        var y = cellPosition.Y;
                         var tapImage = (Image)s;
                         tapImage.Source = ImageSource.FromFile("miss_cell.jpg");
                         int a = 10;
@@ -38,7 +41,6 @@ namespace SeaWar.View
                     PlayerGrid.Children.Add(image,i,j);
                 }
             }
-            
         }
     }
 }
