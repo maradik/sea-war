@@ -95,11 +95,14 @@ namespace Backend.Models
             {
                 for (var j = 0; j < 10; j++)
                 {
-                    mapDto.Cells[i, j].Status = Cells[i, j].Status switch
+                    mapDto.Cells[i, j] = new CellForEnemyDto
                     {
-                        CellStatus.EmptyFired => CellForEnemyDtoStatus.Missed,
-                        CellStatus.EngagedByShipFired => CellForEnemyDtoStatus.Damaged,
-                        _ => CellForEnemyDtoStatus.Unknown
+                        Status = Cells[i, j].Status switch
+                        {
+                            CellStatus.EmptyFired => CellForEnemyDtoStatus.Missed,
+                            CellStatus.EngagedByShipFired => CellForEnemyDtoStatus.Damaged,
+                            _ => CellForEnemyDtoStatus.Unknown
+                        }
                     };
                 }
             }
