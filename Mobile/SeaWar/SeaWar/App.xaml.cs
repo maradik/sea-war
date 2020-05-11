@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Autofac;
+using SeaWar.View;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -8,11 +9,16 @@ namespace SeaWar
 {
     public partial class App : Application
     {
+        public IContainer Container { get; }
+        
         public App()
         {
             InitializeComponent();
 
-            MainPage = new MainPage();
+            var containerBuilder = new ContainerBuilder();
+            containerBuilder.RegisterModule<AutofacModule>();
+            Container = containerBuilder.Build();
+            MainPage = new NavigationPage(Container.Resolve<WelcomePage>());
         }
 
         protected override void OnStart()
