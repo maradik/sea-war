@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using SeaWar.Client.Contracts;
+using Xamarin.Forms.Xaml;
 
 namespace SeaWar.Client
 {
@@ -62,24 +63,11 @@ namespace SeaWar.Client
 
         public Task<GameFireResponse> FireAsync(FireParameters parameters)
         {
+            var enemyMap = EnemyMap.Empty;
+            enemyMap.Cells[parameters.FieredCell.X, parameters.FieredCell.Y].Status = EnemyCellStatus.Damaged;
             return Task.FromResult(new GameFireResponse
             {
-                EnemyMap = new EnemyMap
-                {
-                    Cells = new[,]
-                    {
-                        {new EnemyCell{Status = EnemyCellStatus.Damaged}, new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell()},
-                        {new EnemyCell{Status = EnemyCellStatus.Damaged}, new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell()},
-                        {new EnemyCell{Status = EnemyCellStatus.Damaged}, new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell()},
-                        {new EnemyCell{Status = EnemyCellStatus.Damaged}, new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell()},
-                        {new EnemyCell{Status = EnemyCellStatus.Damaged}, new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell()},
-                        {new EnemyCell{Status = EnemyCellStatus.Damaged}, new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell()},
-                        {new EnemyCell{Status = EnemyCellStatus.Damaged}, new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell()},
-                        {new EnemyCell{Status = EnemyCellStatus.Damaged}, new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell()},
-                        {new EnemyCell{Status = EnemyCellStatus.Damaged}, new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell()},
-                        {new EnemyCell{Status = EnemyCellStatus.Damaged}, new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell(), new EnemyCell()},
-                    }
-                }
+                EnemyMap = enemyMap
             });
         }
     }
