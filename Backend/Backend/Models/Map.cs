@@ -34,5 +34,36 @@ namespace Backend.Models
 
             return true;
         }
+
+        public MapDto ToMapDto()
+        {
+            var mapDto = new MapDto();
+
+            for (int i = 0; i < 10; i++)
+            {
+                for (int j = 0; j < 10; j++)
+                {
+                    mapDto.Cells[i, j].Status = (CellDtoStatus)Cells[i, j].Status;
+                }
+            }
+            
+            return mapDto;
+        }
+        
+        public MapForEnemyDto ToMapForEnemyDto()
+        {
+            var mapDto = new MapForEnemyDto();
+
+            for (int i = 0; i < 10; i++)
+            {
+                for (int j = 0; j < 10; j++)
+                {
+                    if (Cells[i, j].Status == CellStatus.EmptyFired) mapDto.Cells[i, j].Status = CellForEnemyDtoStatus.Missed;
+                    if (Cells[i, j].Status == CellStatus.EngagedByShipFired) mapDto.Cells[i, j].Status = CellForEnemyDtoStatus.Damaged;
+                }
+            }
+            
+            return mapDto;
+        }
     }
 }

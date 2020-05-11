@@ -70,7 +70,7 @@ namespace Backend.Models
             GameFinished = gameFinished;
             return new FireResponseDto
             {
-                EnemyMap = enemyPlayer.OwnMap
+                EnemyMap = enemyPlayer.OwnMap.ToMapForEnemyDto()
             };
         }
 
@@ -93,7 +93,7 @@ namespace Backend.Models
             return new GetGameStatusResponseDto
             {
                 YourChoiceTimeout = gameStatus == GameStatus.YourChoice ? TimeSpan.FromSeconds(30) : TimeSpan.Zero,
-                MyMap = Player1.Id == playerId ? Player1.OwnMap : Player2.OwnMap,
+                MyMap = Player1.Id == playerId ? Player1.OwnMap.ToMapDto() : Player2.OwnMap.ToMapDto(),
                 GameStatus = gameStatus,
                 FinishReason = gameStatus == GameStatus.Finish
                     ? CurrentPlayerId == playerId
