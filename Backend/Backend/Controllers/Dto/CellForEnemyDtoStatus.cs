@@ -4,6 +4,7 @@ namespace Backend.Controllers.Dto
     {
         Unknown = 0,
         Missed = 1,
-        Damaged = 2
+        Damaged = 2,
+        ShipNeighbour = 3
     }
 }

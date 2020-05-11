@@ -104,6 +104,7 @@ namespace Backend.Models
                         {
                             CellStatus.EmptyFired => CellForEnemyDtoStatus.Missed,
                             CellStatus.EngagedByShipFired => CellForEnemyDtoStatus.Damaged,
+                            CellStatus.ShipNeighbour => CellForEnemyDtoStatus.ShipNeighbour,
                             _ => CellForEnemyDtoStatus.Unknown
                         }
                     };
