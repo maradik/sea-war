@@ -36,7 +36,7 @@ namespace Backend.Models
                 return FireResult.Missed;
             }
 
-            throw new ArgumentException("Incorrect move");
+            return FireResult.NeedRetry;
         }
     }
 }
