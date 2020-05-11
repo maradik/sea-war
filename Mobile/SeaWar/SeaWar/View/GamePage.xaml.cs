@@ -12,6 +12,9 @@ namespace SeaWar.View
         {
             InitializeComponent();
             BindingContext = createViewModel(model);
+            
+            var notifyPropertyChanged = Model as INotifyPropertyChanged;
+            notifyPropertyChanged.PropertyChanged += NotifyPropertyChangedOnPropertyChanged;
         }
 
         GameViewModel Model =>  (BindingContext as GameViewModel);      
@@ -19,12 +22,8 @@ namespace SeaWar.View
         protected override void OnAppearing()
         {
             base.OnAppearing();
-            Model.InitGrid(PlayerGrid, false);;
+            Model.InitGrid(PlayerGrid, false);
             Model.InitGrid(AnotherPlayerGrid, true);
-            Model.UpdateGrid(PlayerGrid, Model.MyMap);
-
-            var notifyPropertyChanged = Model as INotifyPropertyChanged;
-            notifyPropertyChanged.PropertyChanged += NotifyPropertyChangedOnPropertyChanged;
         }
 
         private void NotifyPropertyChangedOnPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -32,6 +31,11 @@ namespace SeaWar.View
             if (e.PropertyName == nameof(Model.OpponentMap))
             {
                 Model.UpdateGrid(AnotherPlayerGrid, Model.OpponentMap);    
+            }
+            
+            if (e.PropertyName == nameof(Model.MyMap))
+            {
+                Model.UpdateGrid(PlayerGrid, Model.MyMap);    
             }
         }
     }

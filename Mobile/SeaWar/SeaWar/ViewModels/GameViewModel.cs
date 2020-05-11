@@ -190,7 +190,8 @@ namespace SeaWar.ViewModels
                 for (int j = 0; j < GameModel.MapVerticalSize; j++)
                 {
                     var cell = cells[i, j];
-                    var child = grid.Children[i+j];
+                    var positionFlat = i * GameModel.MapHorizontalSize + j;
+                    var child = grid.Children[positionFlat];
                     var image = (Image) child;
 
                     var imageSource = emptyImageSource;
