@@ -197,7 +197,13 @@ namespace SeaWar.ViewModels
                             var y = cellPosition.Y;
                             var tapImage = (Image) sender;
                             tapImage.Source = missImageSource;
-
+                            
+                            //если кликаем не по пустой ячейке, то ничего не делаем
+                            if (!IsEqualsImageSources(tapImage.Source, emptyImageSource))
+                            {
+                                return;
+                            }
+                            
                             await FireAsync(x, y);
                         };
                     }
@@ -237,12 +243,17 @@ namespace SeaWar.ViewModels
                             break;
                     }
 
-                    if (((FileImageSource) image.Source).File != ((FileImageSource) imageSource).File)
+                    if (!IsEqualsImageSources(image.Source, imageSource))
                     {
                         image.Source = imageSource;
                     }
                 }
             }
+        }
+
+        private bool IsEqualsImageSources(ImageSource sourceA, ImageSource sourceB)
+        {
+            return (((FileImageSource) sourceA).File == ((FileImageSource) sourceB).File);
         }
     }
 }
