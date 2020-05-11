@@ -2,8 +2,8 @@
 {
     public class GameStatusResponse
     {
-        public GameStatus GameStatus { get; }
-        public FinishReason FinishReason { get; }
-        public Map MyMap { get; }
+        public GameStatus GameStatus { get; set; }
+        public FinishReason FinishReason { get; set; }
+        public Map MyMap { get; set; }
     }
 }

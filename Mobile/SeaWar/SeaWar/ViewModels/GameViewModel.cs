@@ -36,7 +36,7 @@ namespace SeaWar.ViewModels
             new[]{new Cell {Status = CellStatus.Missed}, new Cell {Status = CellStatus.Filled}, new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
         };
 
-        public GameViewModel(IClient client, GameModel gameModel)
+        public GameViewModel(GameModel gameModel, IClient client)
         {
             this.client = client;
             this.gameModel = gameModel;

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using SeaWar.Annotations;
 using SeaWar.Client;
@@ -55,7 +56,7 @@ namespace SeaWar.ViewModels
 
         public Command StartGame { get; }
 
-        public WelcomePageModelView(GameModel gameModel, WaitGamePage waitGamePage, GamePage gamePage, IClient client)
+        public WelcomePageModelView(GameModel gameModel, Func<GameModel, WaitGamePage> createWaitGamePage, Func<GameModel, GamePage> createGamePage, IClient client)
         {
             this.client = client;
 
@@ -75,11 +76,11 @@ namespace SeaWar.ViewModels
 
                 if (createRoomResponse.Status == CreateRoomStatus.ReadyForStart)
                 {
-                    await Application.Current.MainPage.Navigation.PushModalAsync(gamePage);
+                    await Application.Current.MainPage.Navigation.PushModalAsync(createGamePage(gameModel));
                 }
                 else
                 {
-                    await Application.Current.MainPage.Navigation.PushModalAsync(waitGamePage);
+                    await Application.Current.MainPage.Navigation.PushModalAsync(createWaitGamePage(gameModel));
                 }
             });
         }
