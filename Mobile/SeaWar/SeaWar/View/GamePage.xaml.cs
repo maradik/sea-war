@@ -12,11 +12,9 @@ namespace SeaWar.View
             InitializeComponent();
             BindingContext = createViewModel(model);
         }
-
-        protected override void OnAppearing()
+        
+        private void InitGrid(Grid grid)
         {
-            base.OnAppearing();
-
             for (int i = 0; i < 10; i++)
             {
                 for (int j = 0; j < 10; j++)
@@ -35,10 +33,16 @@ namespace SeaWar.View
                         int a = 10;
                     };
                     image.GestureRecognizers.Add(tapGestureRecognizer);
-                    PlayerGrid.Children.Add(image,i,j);
+                    grid.Children.Add(image,i,j);
                 }
             }
-            
+        }
+        
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+            InitGrid(PlayerGrid);
+            InitGrid(AnotherPlayerGrid);
         }
     }
 }
