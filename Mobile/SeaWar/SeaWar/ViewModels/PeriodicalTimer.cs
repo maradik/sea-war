@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using SeaWar.Extensions;
 
 namespace SeaWar.ViewModels
 {
@@ -13,6 +14,7 @@ namespace SeaWar.ViewModels
         private readonly TimeSpan period;
         private readonly TimeSpan timeout;
         private volatile CancellationTokenSource stopCancellationTokenSource;
+        private readonly SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
 
         public PeriodicalTimer(TimeSpan period, Func<TimeSpan, Task> periodicalCallback, TimeSpan timeout, Func<Task> onTimeoutCallback, Func<Task> onStopCallback)
         {
@@ -28,19 +30,20 @@ namespace SeaWar.ViewModels
             this.timeout = timeout;
         }
 
-        public Task Start()
+        public async Task Start()
         {
-            stopCancellationTokenSource?.Cancel();
+            await semaphoreSlim.WaitAsync();
+            
             stopCancellationTokenSource = new CancellationTokenSource();
-            Task.Run(async () => await StartInternal(stopCancellationTokenSource.Token));
-            return Task.CompletedTask;
+            Task.Run(async () => await StartInternal(stopCancellationTokenSource.Token)).ContinueInParallel();
         }
 
-        public Task Stop()
+        public async Task Stop()
         {
             stopCancellationTokenSource?.Cancel();
-            onStopCallback();
-            return Task.CompletedTask;
+            await onStopCallback();
+
+            semaphoreSlim.Release();
         }
 
         private async Task StartInternal(CancellationToken cancellation)

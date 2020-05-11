@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using SeaWar.Client.Contracts;
+using SeaWar.DomainModels;
 using Xamarin.Forms.Xaml;
 
 namespace SeaWar.Client
@@ -37,28 +38,16 @@ namespace SeaWar.Client
             });
         }
 
-        public Task<GameStatusResponse> GetGameStatusAsync(GetGameStatusParameters parameters)
+        public async Task<GameStatusResponse> GetGameStatusAsync(GetGameStatusParameters parameters)
         {
-            return Task.FromResult(new GameStatusResponse
+            await Task.Delay(2000);
+            var map = Map.Empty;
+            map.Cells[random.Next(GameModel.MapHorizontalSize), random.Next(GameModel.MapHorizontalSize)].Status = Cell.CellStatus.EngagedByShipFired;
+            return new GameStatusResponse
             {
                 GameStatus = (GameStatus) random.Next(2),
-                MyMap = new Map
-                {
-                    Cells = new[,]
-                    {
-                        {new Cell{Status = Cell.CellStatus.EmptyFired}, new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-                        {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-                        {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-                        {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-                        {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-                        {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-                        {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-                        {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-                        {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-                        {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-                    }
-                }
-            });
+                MyMap = map
+            };
         }
 
         public Task<GameFireResponse> FireAsync(FireParameters parameters)

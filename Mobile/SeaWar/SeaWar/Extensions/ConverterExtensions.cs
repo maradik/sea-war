@@ -71,6 +71,7 @@ namespace SeaWar.Extensions
                 Client.Contracts.Cell.CellStatus.EngagedByShip => CellStatus.Filled,
                 Client.Contracts.Cell.CellStatus.EmptyFired => CellStatus.Missed,
                 Client.Contracts.Cell.CellStatus.EngagedByShipFired => CellStatus.Damaged,
+                Client.Contracts.Cell.CellStatus.ShipNeighbour => CellStatus.Missed,
                 _ => throw new ArgumentException(nameof(dto))
             };
         
