@@ -13,7 +13,7 @@ namespace SeaWar.Client
         {
             return Task.FromResult(new RoomResponse()
             {
-                Status = CreateRoomStatus.WaitingForAnotherPlayer,
+                RoomStatus = CreateRoomStatus.NotReady,
                 PlayerId = Guid.NewGuid(),
                 RoomId = Guid.NewGuid(),
                 AnotherPlayerName = nameof(RoomResponse.AnotherPlayerName)
@@ -24,12 +24,12 @@ namespace SeaWar.Client
         {
             countTryReadyToPlay++;
             var status = countTryReadyToPlay > 1
-                ? CreateRoomStatus.ReadyForStart
-                : CreateRoomStatus.WaitingForAnotherPlayer;
-            
+                ? CreateRoomStatus.Ready
+                : CreateRoomStatus.NotReady;
+
             return Task.FromResult(new RoomResponse()
             {
-                Status = status,
+                RoomStatus = status,
                 PlayerId = parameters.PlayerId,
                 RoomId = parameters.RoomId,
                 AnotherPlayerName = nameof(RoomResponse.AnotherPlayerName)
@@ -41,7 +41,7 @@ namespace SeaWar.Client
             return Task.FromResult(new GameStatusResponse
             {
                 GameStatus = (GameStatus) random.Next(2),
-                MyMap = new Map 
+                MyMap = new Map
                 {
                     Cells = new[,]
                     {

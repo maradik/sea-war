@@ -35,7 +35,7 @@ namespace SeaWar.ViewModels
                         PlayerId = gameModel.PlayerId
                     };
                     var getRoomStatusResponse = await client.GetRoomStatusAsync(parameters);
-                    if (getRoomStatusResponse.Status == CreateRoomStatus.ReadyForStart)
+                    if (getRoomStatusResponse.RoomStatus == CreateRoomStatus.Ready)
                     {
                         Device.BeginInvokeOnMainThread(async () => {
                             await Application.Current.MainPage.Navigation.PushModalAsync(createGamePage(gameModel));
@@ -55,7 +55,7 @@ namespace SeaWar.ViewModels
 
         public void StartWaitAnotherPlayer()
         {
-            waitAnotherPlayerTask = Task.Run(async () => await WaitGameReadyAsync());            
+            waitAnotherPlayerTask = Task.Run(async () => await WaitGameReadyAsync());
         }
     }
 }
