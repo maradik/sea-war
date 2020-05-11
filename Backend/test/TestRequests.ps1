@@ -37,10 +37,11 @@ function WriteMap($cells){
     $out = ''
     foreach($cell in $cells){
         switch ($cell.Status){
-            Unknown { $out += '* ' }
-            Missed  { $out += '- ' }
-            Damaged { $out += '+ ' }
-            default { $out += 'E ' }
+            Unknown       { $out += '* ' }
+            Missed        { $out += 'x ' }
+            ShipNeighbour { $out += 's ' }
+            Damaged       { $out += '+ ' }
+            default       { $out += 'E ' }
         }
     }
     for ($i=0; $i -le 180; $i=$i+20 ) {
@@ -61,9 +62,21 @@ $roomGuid, $player2ID = addPlayer 'name2'
 RoomStatus $roomGuid $player1ID
 
 #fire
-#Fire 0 0 $roomGuid $player1ID | Out-Null
+0..3 | % {Fire $_ 0 $roomGuid $player1ID | Out-Null}
+WriteMap (Fire 9 9 $roomGuid $player1ID)
 
-WriteMap (Fire 0 0 $roomGuid $player1ID)
-WriteMap (Fire 1 1 $roomGuid $player1ID)
-WriteMap (Fire 9 0 $roomGuid $player1ID)
-WriteMap (Fire 5 0 $roomGuid $player1ID)
+<#
+
+for($y = 0; $y -le 9; $y++){
+    for($x = 0; $x -le 9; $x++){
+        WriteMap (Fire $x $y $roomGuid $player1ID)
+    }
+}
+
+#>
+
+
+#WriteMap (Fire 0 0 $roomGuid $player1ID)
+#WriteMap (Fire 1 1 $roomGuid $player1ID)
+#WriteMap (Fire 9 0 $roomGuid $player1ID)
+#WriteMap (Fire 5 0 $roomGuid $player1ID)
