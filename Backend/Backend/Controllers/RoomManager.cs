@@ -24,16 +24,7 @@ namespace Backend.Controllers
             lock (rooms)
             {
                 var room = rooms[roomId];
-                var enemyMap = playerId == room.Player1.Id ? room.Player2.OwnMap : room.Player1.OwnMap;
-                if (enemyMap.Cells[dto.Y, dto.X].Status == Cell.CellStatus.Empty)
-                {
-                    enemyMap.Cells[dto.Y, dto.X].Status = Cell.CellStatus.EmptyFired;
-                    room.CurrentPlayerId = playerId == room.Player1.Id ? room.Player2.Id : room.Player1.Id;
-                }
-                else if (enemyMap.Cells[dto.Y, dto.X].Status == Cell.CellStatus.EngagedByShip)
-                {
-                    enemyMap.Cells[dto.Y, dto.X].Status = Cell.CellStatus.EngagedByShipFired;
-                }
+                var enemyMap = room.DoMove(playerId, dto.X, dto.Y);
 
                 return new FireResponseDto
                 {
@@ -47,20 +38,19 @@ namespace Backend.Controllers
             lock (rooms)
             {
                 var room = rooms[roomId];
-                if (room.Player2 == null)
-                {
-                    //
-                    return null;
-                }
 
-                var gameStatus = room.CurrentPlayerId == playerId ? GameStatus.YourChoice : GameStatus.PendingForFriendChoice;
+                var gameStatus = room.GameStatus;
 
                 return new GetGameStatusResponseDto
                 {
-                    YourChoiceTimeout = gameStatus == GameStatus.YourChoice ? TimeSpan.FromMinutes(1) : TimeSpan.MaxValue,
+                    YourChoiceTimeout = gameStatus == GameStatus.YourChoice ? TimeSpan.FromMinutes(1) : TimeSpan.Zero,
                     MyMap = room.Player1.Id == playerId ? room.Player1.OwnMap : room.Player2.OwnMap,
                     GameStatus = gameStatus,
-                    FinishReason = null
+                    FinishReason = gameStatus == GameStatus.Finish
+                        ? room.CurrentPlayerId == playerId
+                            ? FinishReason.Winner
+                            : FinishReason.Lost
+                        : (FinishReason?) null
                 };
             }
         }
@@ -89,8 +79,6 @@ namespace Backend.Controllers
                     var room = rooms.First(x => x.Value.Status == RoomStatus.NotReady).Value;
                     var player = playerBuilder.Build(requestDto.PlayerName);
                     room.Player2 = player;
-                    room.Player2.EnemyMap = room.Player1.OwnMap;
-                    room.Player1.EnemyMap = room.Player2.OwnMap;
                     room.Status = RoomStatus.Ready;
 
                     return new CreateRoomResponseDto
