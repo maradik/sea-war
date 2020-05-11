@@ -21,7 +21,7 @@ namespace Backend.Models
             Cells[y, x].Status = Cells[y, x].Status == CellStatus.Empty ? CellStatus.EmptyFired : CellStatus.EngagedByShipFired;
 
         public Ship GetShip(int x, int y) =>
-            Ships.First(ship => ship.Cells.Any(cell => cell.X == x && cell.Y == y));
+            Ships.Single(ship => ship.Cells.Any(cell => cell.X == x && cell.Y == y));
 
         public void DismissShipNeighbours(int x, int y)
         {
@@ -36,7 +36,7 @@ namespace Backend.Models
                             continue;
                         if (cell.X + i >= 0 && cell.X + i < 10 && cell.Y + j >= 0 && cell.Y + j < 10)
                         {
-                            if (Cells[cell.Y + j, cell.X + i].Status == CellStatus.Empty)
+                            if (ship.Cells.All(shipCell => shipCell.X != cell.X + i && shipCell.Y != cell.Y + j))
                                 Cells[cell.Y + j, cell.X + i].Status = CellStatus.ShipNeighbour;
                         }
                     }
