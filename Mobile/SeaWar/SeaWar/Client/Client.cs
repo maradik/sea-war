@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using SeaWar.Client.Contracts;
@@ -16,7 +17,8 @@ namespace SeaWar.Client
 
         public async Task<RoomResponse> CreateRoomAsync(CreateRoomParameters parameters)
         {
-            var response = await httpClient.PostAsync("/Room/Create", new StringContent(parameters.PlayerName)).ConfigureAwait(false);
+            var content = new StringContent(JsonConvert.SerializeObject(parameters), Encoding.UTF8, "application/json");
+            var response = await httpClient.PostAsync("/Room/Create", content).ConfigureAwait(false);
             var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             return JsonConvert.DeserializeObject<RoomResponse>(json);
         }
@@ -37,7 +39,7 @@ namespace SeaWar.Client
 
         public async Task<GameFireResponse> FireAsync(FireParameters parameters)
         {
-            var content = new StringContent(JsonConvert.SerializeObject(parameters.FieredCell));
+            var content = new StringContent(JsonConvert.SerializeObject(parameters.FieredCell), Encoding.UTF8, "application/json");
             var response = await httpClient.PostAsync($"/Room/{parameters.RoomId}/Game/Fire?playerId={parameters.PlayerId}", content).ConfigureAwait(false);
             var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             return JsonConvert.DeserializeObject<GameFireResponse>(json);
