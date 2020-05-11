@@ -6,13 +6,11 @@ $result = Invoke-WebRequest -Uri "http://5.189.18.251:8765/room/create" -Method 
 $roomGuid = $result.Content | ConvertFrom-Json | Select-Object -ExpandProperty roomId
 $player1ID = $result.Content | ConvertFrom-Json | Select-Object -ExpandProperty playerId
 $result.Content
-Write-Host $result.StatusCode -ForegroundColor Yellow
 
 #Запрашиваем состояние комнаты 
 Write-Host "`nЗапрашиваем состояние комнаты $roomGuid" -ForegroundColor Green
 $result = Invoke-WebRequest -Uri "http://5.189.18.251:8765/room/$roomGuid/getStatus?playerId=$player1ID" -Method get -UseBasicParsing
 $result.Content | ConvertFrom-Json | fl *
-Write-Host $result.StatusCode -ForegroundColor Yellow
 
 #Создание второго игрока
 $body = "{ PlayerName: 'name2' }"
@@ -22,17 +20,39 @@ $result = Invoke-WebRequest -Uri "http://5.189.18.251:8765/room/create" -Method 
 $player2ID = $result.Content | ConvertFrom-Json | Select-Object -ExpandProperty playerId
 $result.Content
 $roomGuid = $result.Content | ConvertFrom-Json | Select-Object -ExpandProperty roomId
-Write-Host $result.StatusCode -ForegroundColor Yellow
 
 #Запрашиваем состояние комнаты 
 Write-Host "`nGET запрос с guid" -ForegroundColor Green
 $result = Invoke-WebRequest -Uri "http://5.189.18.251:8765/room/$roomGuid/getStatus?playerId=$player1ID" -Method get -UseBasicParsing
 $result.Content | ConvertFrom-Json | fl *
-Write-Host $result.StatusCode -ForegroundColor Yellow
+
+
+function Fire($x, $y){
+    Write-Host "`nСтреляем в $x`:$y" -ForegroundColor Green
+    $body = "{ x: $x, y: $y }"
+    $head = @{'content-type' = 'application/json'}
+    $result = Invoke-WebRequest -Uri "http://5.189.18.251:8765/room/$roomGuid/game/fire?playerId=$player1ID" -Method POST -Body $body -Headers $head -UseBasicParsing
+    return ($result.Content | ConvertFrom-Json | select -ExpandProperty enemymap).cells
+}
+
+function WriteMap($cells){
+    $out = ''
+    foreach($cell in $cells){
+        switch ($cell.Status){
+            Empty              { $out += '* ' }
+            ShipNeighbour      { $out += '- ' }
+            EngagedByShip      { $out += '+ ' }
+            EmptyFired         { $out += 'X ' }
+            EngagedByShipFired { $out += 'D ' }
+            default            { $out += 'E ' }
+        }
+    }
+    for ($i=0; $i -le 180; $i=$i+20 ) {
+        $out.Substring($i,20)
+    }
+}
 
 #fire
-Write-Host "`nСтреляем в 2:3" -ForegroundColor Green
-$body = "{ x: 2, y: 3 }"
-$head = @{'content-type' = 'application/json'}
-$result = Invoke-WebRequest -Uri "http://5.189.18.251:8765/room/$roomGuid/game/fire?playerId=$player1ID" -Method POST -Body $body -Headers $head -UseBasicParsing
-Write-Host $result.StatusCode -ForegroundColor Yellow
+WriteMap (Fire 0 0)
+WriteMap (Fire 1 1)
+WriteMap (Fire 9 0)
