@@ -71,7 +71,7 @@ namespace Backend.Managers
                     var cells = new List<Cell>();
                     for (var k = 0; k < size; ++k)
                     {
-                        cells.Add(new Cell {X = i + k, Y = j});
+                        cells.Add(new Cell {X = i + k, Y = j, Status = CellStatus.EngagedByShip});
                     }
                     result.Add(new Ship {Cells = cells.ToArray()});
                 }
@@ -83,7 +83,7 @@ namespace Backend.Managers
                     var cells = new List<Cell>();
                     for (var k = 0; k < size; ++k)
                     {
-                        cells.Add(new Cell {X = i, Y = j + k});
+                        cells.Add(new Cell {X = i, Y = j + k, Status = CellStatus.EngagedByShip});
                     }
                     result.Add(new Ship {Cells = cells.ToArray()});
                 }
