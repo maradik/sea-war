@@ -17,7 +17,7 @@ namespace SeaWar.ViewModels
 
         private const int minUserNameLength = 5;
         private const string validateMessage = "Имя игрока должно быть не меньше 5 символов";
-        
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         private string _playerName;
@@ -63,7 +63,7 @@ namespace SeaWar.ViewModels
             StartGame = new Command(async _ =>
             {
                 SavePlayerName();
-                
+
                 var parameters = new CreateRoomParameters
                 {
                     PlayerName = PlayerName
@@ -74,7 +74,7 @@ namespace SeaWar.ViewModels
                 gameModel.RoomId = createRoomResponse.RoomId;
                 gameModel.AnotherPlayerName = createRoomResponse.AnotherPlayerName;
 
-                if (createRoomResponse.Status == CreateRoomStatus.ReadyForStart)
+                if (createRoomResponse.RoomStatus == CreateRoomStatus.Ready)
                 {
                     await Application.Current.MainPage.Navigation.PushModalAsync(createGamePage(gameModel));
                 }
