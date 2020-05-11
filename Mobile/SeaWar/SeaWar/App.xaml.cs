@@ -20,12 +20,16 @@ namespace SeaWar
             var containerBuilder = new ContainerBuilder();
             containerBuilder.RegisterModule<AutofacModule>();
             Container = containerBuilder.Build();
+            BeginGame();
+        }
 
+        public void BeginGame()
+        {
             var gameModel = new GameModel();
             var createWelcomePage = Container.Resolve<Func<GameModel, WelcomePage>>();
             MainPage = new NavigationPage(createWelcomePage(gameModel));
         }
-
+        
         protected override void OnStart()
         {
             // Handle when your app starts

@@ -6,6 +6,7 @@ using SeaWar.Client;
 using SeaWar.Client.Contracts;
 using SeaWar.DomainModels;
 using SeaWar.Extensions;
+using SeaWar.View;
 using Xamarin.Forms;
 
 namespace SeaWar.ViewModels
@@ -25,6 +26,7 @@ namespace SeaWar.ViewModels
         private readonly PeriodicalTimer fireTimeoutTimer;
         private string formattedStatus;
         private readonly GameModel gameModel;
+        private readonly Func<GameModel, FinishPage> createFinishPage;
 
         //TODO Для тестовых целей только!!! Настоящие карты лежат в MyMap и OpponentMap.
         //TODO Выпилить, когда в GamePage.xaml замкнем отрисовку на настоящие карты
@@ -41,10 +43,11 @@ namespace SeaWar.ViewModels
             new[]{new Cell {Status = CellStatus.Missed}, new Cell {Status = CellStatus.Filled}, new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
         };
 
-        public GameViewModel(GameModel gameModel, IClient client)
+        public GameViewModel(GameModel gameModel, Func<GameModel, FinishPage> createFinishPage, IClient client)
         {
             this.client = client;
             this.gameModel = gameModel;
+            this.createFinishPage = createFinishPage;
             fireTimeoutTimer = new PeriodicalTimer(TimeSpan.FromSeconds(1), UpdateYourChoiceFormattedStatusAsync, fireTimeout, RandomFireAsync, SetOpponentChoiceFormattedStatusAsync);
             OpponentMap = Map.Empty;
             Task.Run(async () => await GetStatusAsync());
@@ -117,7 +120,12 @@ namespace SeaWar.ViewModels
                     case GameStatus.PendingForFriendChoise:
                         break;
                     case GameStatus.Finish:
-                        //TODO GoTo Finish screen
+                        gameModel.MyMap = MyMap;
+                        gameModel.OpponentMap = OpponentMap;
+                        gameModel.FinishReason = gameStatus.FinishReason.ToModel();
+                        Device.BeginInvokeOnMainThread(async () => {
+                            await Application.Current.MainPage.Navigation.PushModalAsync(createFinishPage(gameModel));
+                        });
                         return;
                     default:
                         throw new ArgumentOutOfRangeException();
