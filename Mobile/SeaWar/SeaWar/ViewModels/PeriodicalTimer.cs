@@ -8,12 +8,13 @@ namespace SeaWar.ViewModels
     public class PeriodicalTimer
     {
         private readonly Func<Task> onTimeoutCallback;
+        private readonly Func<Task> onStopCallback;
         private readonly Func<TimeSpan, Task> periodicalCallback;
         private readonly TimeSpan period;
         private readonly TimeSpan timeout;
         private volatile CancellationTokenSource stopCancellationTokenSource;
 
-        public PeriodicalTimer(TimeSpan period, Func<TimeSpan, Task> periodicalCallback, TimeSpan timeout, Func<Task> onTimeoutCallback)
+        public PeriodicalTimer(TimeSpan period, Func<TimeSpan, Task> periodicalCallback, TimeSpan timeout, Func<Task> onTimeoutCallback, Func<Task> onStopCallback)
         {
             if (timeout < period)
             {
@@ -21,29 +22,35 @@ namespace SeaWar.ViewModels
             }
 
             this.onTimeoutCallback = onTimeoutCallback;
+            this.onStopCallback = onStopCallback;
             this.periodicalCallback = periodicalCallback;
             this.period = period;
             this.timeout = timeout;
         }
 
-        public void Start()
+        public Task Start()
         {
             Task.Run(async () => await StartInternal());
+            return Task.CompletedTask;
         }
 
-        public void Stop() =>
+        public Task Stop()
+        {
             stopCancellationTokenSource?.Cancel();
+            onStopCallback();
+            return Task.CompletedTask;
+        }
 
         private async Task StartInternal()
         {
             stopCancellationTokenSource = new CancellationTokenSource();
-            var cancellationToken = new CancellationTokenSource(timeout).Token;
+            var timeoutCancellation = new CancellationTokenSource(timeout).Token;
             var stopwatch = new Stopwatch();
             stopwatch.Start();
             
             while (!stopCancellationTokenSource.Token.IsCancellationRequested)
             {
-                if (cancellationToken.IsCancellationRequested)
+                if (timeoutCancellation.IsCancellationRequested)
                 {
                     await onTimeoutCallback();
                     return;
