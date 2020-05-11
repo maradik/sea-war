@@ -12,6 +12,11 @@ namespace Backend.Models
             Cells.Single(cell => cell.X == x && cell.Y == y).Status = CellStatus.EngagedByShipFired;
         }
 
+        public bool ContainsCell(int x, int y)
+        {
+            return Cells.Any(cell => cell.X == x && cell.Y == y);
+        }
+
         public ShipStatus Status => Cells.Any(cell => cell.Status == CellStatus.EngagedByShip)
             ? ShipStatus.Alive
             : ShipStatus.Killed;

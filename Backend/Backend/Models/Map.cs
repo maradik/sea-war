@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using Backend.Controllers.Dto;
 
@@ -10,6 +11,20 @@ namespace Backend.Models
 
         public bool IsEmpty(int x, int y) =>
             Cells[y, x].Status == CellStatus.Empty;
+
+        public Cell[] GetCellNeighbours(Cell cell)
+        {
+            var result = new List<Cell>();
+            for (var i = -1; i <= 1; ++i)
+            {
+                for (var j = -1; j <= 1; ++j)
+                {
+                    if (cell.X + i >= 0 && cell.X + i < 10 && cell.Y + j >= 0 && cell.Y < 10)
+                        result.Add(Cells[cell.Y + j, cell.X + i]);
+                }
+            }
+            return result.ToArray();
+        }
 
         public bool HasAliveShip() =>
             Ships.Any(ship => ship.Status == ShipStatus.Alive);
@@ -28,19 +43,9 @@ namespace Backend.Models
             var ship = GetShip(x, y);
             foreach (var cell in ship.Cells)
             {
-                for (var i = -1; i <= 1; ++i)
-                {
-                    for (var j = -1; j <= 1; ++j)
-                    {
-                        if (i == 0 && j == 0)
-                            continue;
-                        if (cell.X + i >= 0 && cell.X + i < 10 && cell.Y + j >= 0 && cell.Y + j < 10)
-                        {
-                            if (ship.Cells.All(shipCell => shipCell.X != cell.X + i && shipCell.Y != cell.Y + j))
-                                Cells[cell.Y + j, cell.X + i].Status = CellStatus.ShipNeighbour;
-                        }
-                    }
-                }
+                var cellNeighbours = GetCellNeighbours(cell).Where(neighbour => ship.ContainsCell(neighbour.X, neighbour.Y));
+                foreach (var cellNeighbour in cellNeighbours)
+                    Cells[cellNeighbour.Y, cell.X].Status = CellStatus.ShipNeighbour;
             }
         }
 
