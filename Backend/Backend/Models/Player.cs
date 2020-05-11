@@ -16,6 +16,8 @@ namespace Backend.Models
         {
             if (OwnMap.HasShip(x, y))
             {
+                OwnMap.Fire(x, y);
+
                 var ship = OwnMap.GetShip(x, y);
                 ship.Damage(x, y);
 
@@ -29,7 +31,10 @@ namespace Backend.Models
             }
 
             if (OwnMap.IsEmpty(x, y))
+            {
+                OwnMap.Fire(x, y);
                 return FireResult.Missed;
+            }
 
             throw new ArgumentException("Incorrect move");
         }

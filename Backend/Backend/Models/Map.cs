@@ -17,6 +17,9 @@ namespace Backend.Models
         public bool HasShip(int x, int y) =>
             Cells[y, x].Status == CellStatus.EngagedByShip;
 
+        public void Fire(int x, int y) =>
+            Cells[y, x].Status = Cells[y, x].Status == CellStatus.Empty ? CellStatus.EmptyFired : CellStatus.EngagedByShipFired;
+
         public Ship GetShip(int x, int y) =>
             Ships.First(ship => ship.Cells.Any(cell => cell.X == x && cell.Y == y));
 
