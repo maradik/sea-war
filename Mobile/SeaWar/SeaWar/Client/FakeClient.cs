@@ -68,7 +68,7 @@ namespace SeaWar.Client
                 {
                     Cells = new[,]
                     {
-                        {new Cell{Status = Cell.CellStatus.EngagedByShipFired}, new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
+                        {new Cell{Status = Cell.CellStatus.EngagedByShipFired}, new Cell{Status = Cell.CellStatus.EmptyFired}, new Cell{Status = Cell.CellStatus.EmptyFired}, new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
                         {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
                         {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
                         {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},

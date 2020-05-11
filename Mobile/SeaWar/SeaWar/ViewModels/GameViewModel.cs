@@ -2,10 +2,12 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using SeaWar.Annotations;
 using SeaWar.Client;
 using SeaWar.Client.Contracts;
 using SeaWar.DomainModels;
 using SeaWar.Extensions;
+using SeaWar.View;
 using Xamarin.Forms;
 
 namespace SeaWar.ViewModels
@@ -20,31 +22,52 @@ namespace SeaWar.ViewModels
         private ImageSource emptyImageSource = ImageSource.FromFile("empty_cell.jpg");
         private ImageSource shipImageSource = ImageSource.FromFile("ship_cell.jpg");
         private ImageSource missImageSource = ImageSource.FromFile("miss_cell.jpg");
-        
+
         private readonly IClient client;
         private readonly PeriodicalTimer fireTimeoutTimer;
         private string formattedStatus;
         private readonly GameModel gameModel;
+        private readonly Func<GameModel, FinishPage> createFinishPage;
 
-        //TODO Для тестовых целей только!!! Настоящие карты лежат в MyMap и OpponentMap.
-        //TODO Выпилить, когда в GamePage.xaml замкнем отрисовку на настоящие карты
-        public Cell[][] Cells { get; } = {
-            new[]{new Cell {Status = CellStatus.Damaged}, new Cell {Status = CellStatus.Empty}, new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-            new[]{new Cell {Status = CellStatus.Missed}, new Cell {Status = CellStatus.Filled}, new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-            new[]{new Cell {Status = CellStatus.Missed}, new Cell {Status = CellStatus.Filled}, new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-            new[]{new Cell {Status = CellStatus.Missed}, new Cell {Status = CellStatus.Filled}, new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-            new[]{new Cell {Status = CellStatus.Missed}, new Cell {Status = CellStatus.Filled}, new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-            new[]{new Cell {Status = CellStatus.Missed}, new Cell {Status = CellStatus.Filled}, new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-            new[]{new Cell {Status = CellStatus.Missed}, new Cell {Status = CellStatus.Filled}, new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-            new[]{new Cell {Status = CellStatus.Missed}, new Cell {Status = CellStatus.Filled}, new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-            new[]{new Cell {Status = CellStatus.Missed}, new Cell {Status = CellStatus.Filled}, new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-            new[]{new Cell {Status = CellStatus.Missed}, new Cell {Status = CellStatus.Filled}, new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-        };
+        private Map myMap;
+        private Map opponentMap;
+        private bool disabledOpponentGrid;
 
-        public GameViewModel(GameModel gameModel, IClient client)
+        public Map OpponentMap
+        {
+            get => opponentMap;
+            set
+            {
+                opponentMap = value;
+                OnPropertyChanged(nameof(OpponentMap));
+            }
+        }
+
+        public Map MyMap
+        {
+            get => myMap;
+            set
+            {
+                myMap = value;
+                OnPropertyChanged(nameof(MyMap));
+            }
+        }
+
+        public bool DisabledOpponentGrid
+        {
+            get => disabledOpponentGrid;
+            set
+            {
+                disabledOpponentGrid = value;
+                OnPropertyChanged(nameof(DisabledOpponentGrid));
+            }
+        }
+        
+        public GameViewModel(GameModel gameModel, Func<GameModel, FinishPage> createFinishPage, IClient client)
         {
             this.client = client;
             this.gameModel = gameModel;
+            this.createFinishPage = createFinishPage;
             fireTimeoutTimer = new PeriodicalTimer(TimeSpan.FromSeconds(1), UpdateYourChoiceFormattedStatusAsync, fireTimeout, RandomFireAsync, SetOpponentChoiceFormattedStatusAsync);
             OpponentMap = Map.Empty;
             Task.Run(async () => await GetStatusAsync());
@@ -65,9 +88,7 @@ namespace SeaWar.ViewModels
             }
         }
 
-        public Map MyMap { get; set; }
-        public Map OpponentMap { get; set; }
-
+        [NotifyPropertyChangedInvocator]
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -75,7 +96,7 @@ namespace SeaWar.ViewModels
 
         private async Task FireAsync(int x, int y)
         {
-            //TODO Задизейблить контролы
+            DisabledOpponentGrid = true;
             await fireTimeoutTimer.Stop();
 
             //TODO нужно "запретить" стрелять по клетке, по которой уже стрелял
@@ -87,7 +108,7 @@ namespace SeaWar.ViewModels
             };
             var fireResult = await client.FireAsync(parameters);
             OpponentMap = fireResult.OpponentMap.ToModel();
-            
+
             //ToDo redraw
             await GetStatusAsync();
         }
@@ -112,12 +133,17 @@ namespace SeaWar.ViewModels
                 {
                     case GameStatus.YourChoise:
                         await fireTimeoutTimer.Start();
-                        //TODO Раздизейблить контролы
+                        DisabledOpponentGrid = false;
                         return;
                     case GameStatus.PendingForFriendChoise:
                         break;
                     case GameStatus.Finish:
-                        //TODO GoTo Finish screen
+                        gameModel.MyMap = MyMap;
+                        gameModel.OpponentMap = OpponentMap;
+                        gameModel.FinishReason = gameStatus.FinishReason.ToModel();
+                        Device.BeginInvokeOnMainThread(async () => {
+                            await Application.Current.MainPage.Navigation.PushModalAsync(createFinishPage(gameModel));
+                        });
                         return;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -156,7 +182,7 @@ namespace SeaWar.ViewModels
                 {
                     var image = new Image()
                     {
-                        Source = "empty_cell.jpg"
+                        Source = emptyImageSource
                     };
 
                     var tapGestureRecognizer = new TapGestureRecognizer();
@@ -170,14 +196,20 @@ namespace SeaWar.ViewModels
                             var x = cellPosition.X;
                             var y = cellPosition.Y;
                             var tapImage = (Image) sender;
-                            tapImage.Source = ImageSource.FromFile("miss_cell.jpg");
+                            tapImage.Source = missImageSource;
                             
-                            await FireAsync(x,y);
+                            //если кликаем не по пустой ячейке, то ничего не делаем
+                            if (!IsEqualsImageSources(tapImage.Source, emptyImageSource))
+                            {
+                                return;
+                            }
+                            
+                            await FireAsync(x, y);
                         };
                     }
 
                     image.GestureRecognizers.Add(tapGestureRecognizer);
-                    grid.Children.Add(image,i,j);
+                    grid.Children.Add(image, i, j);
                 }
             }
         }
@@ -211,12 +243,17 @@ namespace SeaWar.ViewModels
                             break;
                     }
 
-                    if (((FileImageSource) image.Source).File != ((FileImageSource) imageSource).File)
+                    if (!IsEqualsImageSources(image.Source, imageSource))
                     {
                         image.Source = imageSource;
                     }
                 }
             }
+        }
+
+        private bool IsEqualsImageSources(ImageSource sourceA, ImageSource sourceB)
+        {
+            return (((FileImageSource) sourceA).File == ((FileImageSource) sourceB).File);
         }
     }
 }

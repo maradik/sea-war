@@ -28,6 +28,9 @@ namespace SeaWar
 
             builder.RegisterType<GamePage>().AsSelf();
             builder.RegisterType<GameViewModel>().AsSelf();
+            
+            builder.RegisterType<FinishPage>().AsSelf();
+            builder.RegisterType<FinishViewModel>().AsSelf();
         }
     }
 }
