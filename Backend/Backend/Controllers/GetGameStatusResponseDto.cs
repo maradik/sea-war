@@ -8,6 +8,6 @@ namespace Backend.Controllers
         public GameStatus GameStatus { get; set; }
         public TimeSpan YourChoiceTimeout { get; set; }
         public FinishReason? FinishReason { get; set; }
-        public Map MyMap { get; set; }
+        public MapDto MyMap { get; set; }
     }
 }

@@ -4,6 +4,6 @@ namespace Backend.Controllers
 {
     public class FireResponseDto
     {
-        public Map EnemyMap { get; set; }
+        public MapForEnemyDto EnemyMap { get; set; }
     }
 }

@@ -37,7 +37,7 @@ namespace Backend.Controllers
 
                 return new FireResponseDto
                 {
-                    EnemyMap = enemyMap
+                    EnemyMap = enemyMap.ToMapForEnemyDto()
                 };
             }
         }
@@ -54,7 +54,7 @@ namespace Backend.Controllers
                 return new GetGameStatusResponseDto
                 {
                     YourChoiceTimeout = gameStatus == GameStatus.YourChoice ? TimeSpan.FromMinutes(1) : TimeSpan.Zero,
-                    MyMap = room.Player1.Id == playerId ? room.Player1.OwnMap : room.Player2.OwnMap,
+                    MyMap = room.Player1.Id == playerId ? room.Player1.OwnMap.ToMapDto() : room.Player2.OwnMap.ToMapDto(),
                     GameStatus = gameStatus,
                     FinishReason = null
                 };
