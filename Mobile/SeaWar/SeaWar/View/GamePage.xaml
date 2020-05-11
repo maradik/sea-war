@@ -16,34 +16,64 @@
         <Label Text="{Binding MyName}" Grid.Column="0" Grid.Row="0" HorizontalOptions="Center" VerticalOptions="Center" />
         <Label Text="{Binding OpponentName}" Grid.Column="1" Grid.Row="0" HorizontalOptions="Center" VerticalOptions="Center" />
         
+        <StackLayout Grid.Column="0" Grid.Row="1">
+            <Grid x:Name="PlayerGrid">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+
+            </Grid>
+        </StackLayout>
+        
         <!-- Добавить IsEnabled для блокировки карты? -->
-        <CollectionView ItemsSource="{Binding Cells}" Grid.Column="0" Grid.Row="1" IsEnabled="{Binding}" Margin="0" BackgroundColor="Aquamarine">
-            <CollectionView.ItemsLayout>
-                <GridItemsLayout Orientation="Horizontal" Span="10" />
-            </CollectionView.ItemsLayout>
-            <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <!-- ВАЖНО! Такой подход работает с массивом массивов -->
-                    <!-- Для отрисовки многомерного массива, возможно, даже не нужно вложенности. Не успел попробовать -->
-                    <CollectionView ItemsSource="{Binding .}" Margin="0" BackgroundColor="Chocolate">
-                        <CollectionView.ItemsLayout>
-                            <GridItemsLayout Orientation="Vertical" Span="10"/>
-                        </CollectionView.ItemsLayout>
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate>
-                                <!-- Должно быть что-то такое: картинка, по которой можно тапнуть -->
-                                <!-- Добавить IsEnabled для блокировки елемента, по которому стреляли, а также ImageSource и Command в тип Cell?  -->
-                                <Image Source="empty_cell.jpg" Margin="0">
-                                    <Image.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding}"></TapGestureRecognizer>
-                                    </Image.GestureRecognizers>
-                                </Image>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
+        <!-- <CollectionView ItemsSource="{Binding Cells}" Grid.Column="0" Grid.Row="1" IsEnabled="{Binding}" Margin="0" BackgroundColor="Aquamarine"> -->
+        <!--     <CollectionView.ItemsLayout> -->
+        <!--         <GridItemsLayout Orientation="Horizontal" Span="10" /> -->
+        <!--     </CollectionView.ItemsLayout> -->
+        <!--     <CollectionView.ItemTemplate> -->
+        <!--         <DataTemplate> -->
+        <!--             ~1~ ВАЖНО! Такой подход работает с массивом массивов @1@ -->
+        <!--             ~1~ Для отрисовки многомерного массива, возможно, даже не нужно вложенности. Не успел попробовать @1@ -->
+        <!--             <CollectionView ItemsSource="{Binding .}" Margin="0" BackgroundColor="Chocolate"> -->
+        <!--                 <CollectionView.ItemsLayout> -->
+        <!--                     <GridItemsLayout Orientation="Vertical" Span="10"/> -->
+        <!--                 </CollectionView.ItemsLayout> -->
+        <!--                 <CollectionView.ItemTemplate> -->
+        <!--                     <DataTemplate> -->
+        <!--                         ~1~ Должно быть что-то такое: картинка, по которой можно тапнуть @1@ -->
+        <!--                         ~1~ Добавить IsEnabled для блокировки елемента, по которому стреляли, а также ImageSource и Command в тип Cell?  @1@ -->
+        <!--                         <Image Source="empty_cell.jpg" Margin="0"> -->
+        <!--                             <Image.GestureRecognizers> -->
+        <!--                                 <TapGestureRecognizer Command="{Binding}"></TapGestureRecognizer> -->
+        <!--                             </Image.GestureRecognizers> -->
+        <!--                         </Image> -->
+        <!--                     </DataTemplate> -->
+        <!--                 </CollectionView.ItemTemplate> -->
+        <!--             </CollectionView> -->
+        <!--         </DataTemplate> -->
+        <!--     </CollectionView.ItemTemplate> -->
+        <!-- </CollectionView> -->
     </Grid>
 
 </ContentPage>
