@@ -4,8 +4,7 @@ namespace Backend.Models
     {
         Empty = 0,
         EngagedByShip = 1,
-        ShipNeighbour = 2,
-        EmptyFired = 3,
-        EngagedByShipFired = 4
+        EmptyFired = 2,
+        EngagedByShipFired = 3
     }
 }

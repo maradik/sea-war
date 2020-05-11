@@ -10,7 +10,7 @@ namespace Backend.Models
 
         public CellStatus ProcessEnemyMove(int x, int y)
         {
-            if (OwnMap.Cells[y, x].Status == CellStatus.Empty || OwnMap.Cells[y, x].Status == CellStatus.ShipNeighbour)
+            if (OwnMap.Cells[y, x].Status == CellStatus.Empty)
             {
                 OwnMap.Cells[y, x].Status = CellStatus.EmptyFired;
                 return CellStatus.EmptyFired;

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Backend.Controllers;
-using Backend.Models;
-using Microsoft.Extensions.Hosting.Internal;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
 namespace Backend.Tests
 {

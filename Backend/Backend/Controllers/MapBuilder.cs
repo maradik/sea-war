@@ -8,6 +8,17 @@ namespace Backend.Controllers
     {
         public Map Build()
         {
+            var map = new Map
+            {
+                Cells = GetEmptyCells()
+            };
+            GenerateShipPositions(map);
+
+            return map;
+        }
+
+        private static Cell[,] GetEmptyCells()
+        {
             var cells = new Cell[10, 10];
             for (var i = 0; i < 10; ++i)
             {
@@ -20,14 +31,7 @@ namespace Backend.Controllers
                 }
             }
 
-            var map = new Map()
-            {
-                Cells = cells,
-                Ships = Array.Empty<Ship>()
-            };
-            GenerateShipPositions(map);
-
-            return map;
+            return cells;
         }
 
         private void GenerateShipPositions(Map map)
@@ -68,7 +72,7 @@ namespace Backend.Controllers
                     {
                         cells.Add(new Point {X = i + k, Y = j});
                     }
-                    result.Add(new Ship() {Cells = cells.ToArray()});
+                    result.Add(new Ship {Cells = cells.ToArray()});
                 }
             }
             for (var i = 0; i < 10; ++i)
@@ -80,7 +84,7 @@ namespace Backend.Controllers
                     {
                         cells.Add(new Point {X = i, Y = j + k});
                     }
-                    result.Add(new Ship() {Cells = cells.ToArray()});
+                    result.Add(new Ship {Cells = cells.ToArray()});
                 }
             }
             return result;
