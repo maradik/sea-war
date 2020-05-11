@@ -13,7 +13,7 @@ namespace SeaWar.Client
         {
             return Task.FromResult(new RoomResponse()
             {
-                RoomStatus = CreateRoomStatus.WaitingForAnotherPlayer,
+                RoomStatus = CreateRoomStatus.NotReady,
                 PlayerId = Guid.NewGuid(),
                 RoomId = Guid.NewGuid(),
                 AnotherPlayerName = nameof(RoomResponse.AnotherPlayerName)
@@ -25,7 +25,7 @@ namespace SeaWar.Client
             countTryReadyToPlay++;
             var status = countTryReadyToPlay > 1
                 ? CreateRoomStatus.Ready
-                : CreateRoomStatus.WaitingForAnotherPlayer;
+                : CreateRoomStatus.NotReady;
 
             return Task.FromResult(new RoomResponse()
             {

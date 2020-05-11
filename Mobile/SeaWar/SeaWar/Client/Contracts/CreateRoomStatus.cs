@@ -2,7 +2,7 @@
 {
     public enum CreateRoomStatus
     {
-        WaitingForAnotherPlayer = 0,
+        NotReady = 0,
         Ready = 1
     }
 }
