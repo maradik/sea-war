@@ -93,7 +93,7 @@ namespace Backend.Models
             {
                 for (var j = 0; j < 10; j++)
                 {
-                    mapDto.Cells[i, j].Status = Cells[i, j].Status;
+                    mapDto.Cells[i, j] = new Cell {X = j, Y = i, Status = Cells[i, j].Status};
                 }
             }
 
