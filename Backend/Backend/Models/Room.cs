@@ -72,7 +72,7 @@ namespace Backend.Models
                 PlayerId = playerId,
                 RoomId = Id,
                 RoomStatus = Status,
-                AnotherPlayerName = GetEnemyPlayer(playerId).Name
+                AnotherPlayerName = GetEnemyPlayer(playerId)?.Name
             };
 
         public GetGameStatusResponseDto GetGameStatus(Guid playerId)
