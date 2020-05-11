@@ -39,6 +39,7 @@ namespace SeaWar.Client
         public async Task<T2> RetryAsync<T1, T2>( Func<T1, Task<T2>> func, T1 parameters)
         {
             var retries = 0;
+            var toSleep = TimeSpan.FromMilliseconds(1000);
             Exception exception = null;
             while (retries < retryCount)
             {
@@ -51,6 +52,11 @@ namespace SeaWar.Client
                     exception = e;
                 }
                 retries++;
+                if (retries < retryCount)
+                {
+                    await Task.Delay(toSleep);
+                    toSleep = TimeSpan.FromMilliseconds(toSleep.TotalMilliseconds * 1.5);
+                }
             }
             throw exception;
         }
