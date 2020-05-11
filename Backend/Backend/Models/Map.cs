@@ -1,6 +1,4 @@
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
-using Backend.Controllers;
 using Backend.Controllers.Dto;
 
 namespace Backend.Models
@@ -65,6 +63,8 @@ namespace Backend.Models
             {
                 Cells[cell.Y, cell.X].Status = CellStatus.EngagedByShip;
             }
+
+            Ships = Ships.Append(ship).ToArray();
 
             return true;
         }

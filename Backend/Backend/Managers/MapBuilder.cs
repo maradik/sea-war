@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Backend.Models;
 
@@ -9,7 +10,8 @@ namespace Backend.Managers
         {
             var map = new Map
             {
-                Cells = GetEmptyCells()
+                Cells = GetEmptyCells(),
+                Ships = Array.Empty<Ship>()
             };
             GenerateShipPositions(map);
 
