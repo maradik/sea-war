@@ -6,6 +6,7 @@ namespace SeaWar.Client
 {
     public class FakeClient : IClient
     {
+        private static Random random = new Random();
         private int countTryReadyToPlay;
 
         public Task<RoomResponse> CreateRoomAsync(CreateRoomParameters parameters)
@@ -37,17 +38,48 @@ namespace SeaWar.Client
 
         public Task<GameStatusResponse> GetGameStatusAsync(GetGameStatusParameters parameters)
         {
-            return Task.FromResult(new GameStatusResponse()
+            return Task.FromResult(new GameStatusResponse
             {
-                MyMap = { }
+                GameStatus = GameStatus.YourChoise, //(GameStatus) random.Next(2),
+                MyMap = new Map 
+                {
+                    Cells = new[,]
+                    {
+                        {new Cell{Status = Cell.CellStatus.EmptyFired}, new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
+                        {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
+                        {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
+                        {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
+                        {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
+                        {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
+                        {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
+                        {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
+                        {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
+                        {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
+                    }
+                }
             });
         }
 
         public Task<GameFireResponse> FireAsync(FireParameters parameters)
         {
-            return Task.FromResult(new GameFireResponse()
+            return Task.FromResult(new GameFireResponse
             {
-                OpponentMap = { }
+                OpponentMap = new Map
+                {
+                    Cells = new[,]
+                    {
+                        {new Cell{Status = Cell.CellStatus.EngagedByShipFired}, new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
+                        {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
+                        {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
+                        {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
+                        {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
+                        {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
+                        {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
+                        {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
+                        {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
+                        {new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
+                    }
+                }
             });
         }
     }

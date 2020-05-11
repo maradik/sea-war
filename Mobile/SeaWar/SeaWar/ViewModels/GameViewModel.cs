@@ -12,7 +12,7 @@ namespace SeaWar.ViewModels
     public class GameViewModel : INotifyPropertyChanged
     {
         private static readonly Random random = new Random();
-        private static readonly TimeSpan fireTimeout = TimeSpan.FromSeconds(10);
+        private static readonly TimeSpan fireTimeout = TimeSpan.FromSeconds(15);
         private static readonly TimeSpan periodOfStatusPolling = TimeSpan.FromSeconds(1);
 
         private readonly IClient client;
@@ -40,7 +40,9 @@ namespace SeaWar.ViewModels
         {
             this.client = client;
             this.gameModel = gameModel;
-            fireTimeoutTimer = new PeriodicalTimer(TimeSpan.FromSeconds(1), UpdateFormattedTimeoutRemainAsync, fireTimeout, RandomFireAsync);
+            fireTimeoutTimer = new PeriodicalTimer(TimeSpan.FromSeconds(1), UpdateFormattedTimeoutRemainAsync, fireTimeout, RandomFireAsync, ClearFormattedTimeoutRemain);
+            OpponentMap = Map.Empty;
+            Task.Run(async () => await GetStatusAsync());
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -78,7 +80,7 @@ namespace SeaWar.ViewModels
         private async Task FireAsync(int x, int y)
         {
             //TODO Задизейблить контролы
-            fireTimeoutTimer.Stop();
+            await fireTimeoutTimer.Stop();
             
             //TODO нужно "запретить" стрелять по клетке, по которой уже стрелял
             var parameters = new FireParameters
@@ -110,12 +112,11 @@ namespace SeaWar.ViewModels
                     case GameStatus.YourChoise:
                         MyMap = gameStatus.MyMap.ToModel();
                         FormattedStatus = "Твой ход";
-                        fireTimeoutTimer.Start();
+                        await fireTimeoutTimer.Start();
                         //TODO Раздизейблить контролы
                         return;
                     case GameStatus.PendingForFriendChoise:
                         FormattedStatus = "Ход соперника";
-                        FormattedTimeoutRemain = string.Empty;
                         break;
                     case GameStatus.Finish:
                         //TODO GoTo Finish screen
@@ -130,19 +131,23 @@ namespace SeaWar.ViewModels
 
         private Task UpdateFormattedTimeoutRemainAsync(TimeSpan remain)
         {
-            FormattedTimeoutRemain = remain.ToString();
+            FormattedTimeoutRemain = remain.TotalSeconds.ToString("0");
             return Task.CompletedTask;
         }
 
         private async Task RandomFireAsync()
         {
-            FormattedTimeoutRemain = String.Empty;
-            
             //TODO нужно "запретить" стрелять по клетке, по которой уже стрелял
             var x = random.Next(OpponentMap.Cells.GetLength(0));
             var y = random.Next(OpponentMap.Cells.GetLength(1));
             
             await FireAsync(x, y);
+        }
+
+        private Task ClearFormattedTimeoutRemain()
+        {
+            FormattedTimeoutRemain = String.Empty;
+            return Task.CompletedTask;
         }
     }
 }
