@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using SeaWar.Annotations;
 using SeaWar.Client;
 using SeaWar.Client.Contracts;
 using SeaWar.DomainModels;
@@ -20,32 +21,52 @@ namespace SeaWar.ViewModels
         private ImageSource emptyImageSource = ImageSource.FromFile("empty_cell.jpg");
         private ImageSource shipImageSource = ImageSource.FromFile("ship_cell.jpg");
         private ImageSource missImageSource = ImageSource.FromFile("miss_cell.jpg");
-        
+
         private readonly IClient client;
         private readonly PeriodicalTimer fireTimeoutTimer;
         private string formattedStatus;
         private readonly GameModel gameModel;
 
-        //TODO Для тестовых целей только!!! Настоящие карты лежат в MyMap и OpponentMap.
-        //TODO Выпилить, когда в GamePage.xaml замкнем отрисовку на настоящие карты
-        public Cell[][] Cells { get; } = {
-            new[]{new Cell {Status = CellStatus.Damaged}, new Cell {Status = CellStatus.Empty}, new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-            new[]{new Cell {Status = CellStatus.Missed}, new Cell {Status = CellStatus.Filled}, new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-            new[]{new Cell {Status = CellStatus.Missed}, new Cell {Status = CellStatus.Filled}, new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-            new[]{new Cell {Status = CellStatus.Missed}, new Cell {Status = CellStatus.Filled}, new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-            new[]{new Cell {Status = CellStatus.Missed}, new Cell {Status = CellStatus.Filled}, new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-            new[]{new Cell {Status = CellStatus.Missed}, new Cell {Status = CellStatus.Filled}, new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-            new[]{new Cell {Status = CellStatus.Missed}, new Cell {Status = CellStatus.Filled}, new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-            new[]{new Cell {Status = CellStatus.Missed}, new Cell {Status = CellStatus.Filled}, new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-            new[]{new Cell {Status = CellStatus.Missed}, new Cell {Status = CellStatus.Filled}, new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-            new[]{new Cell {Status = CellStatus.Missed}, new Cell {Status = CellStatus.Filled}, new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()},
-        };
+        private Map myMap;
+        private Map opponentMap;
+        private bool disabledOpponentGrid;
 
+        public Map OpponentMap
+        {
+            get => opponentMap;
+            set
+            {
+                opponentMap = value;
+                OnPropertyChanged(nameof(OpponentMap));
+            }
+        }
+
+        public Map MyMap
+        {
+            get => myMap;
+            set
+            {
+                myMap = value;
+                OnPropertyChanged(nameof(MyMap));
+            }
+        }
+
+        public bool DisabledOpponentGrid
+        {
+            get => disabledOpponentGrid;
+            set
+            {
+                disabledOpponentGrid = value;
+                OnPropertyChanged(nameof(DisabledOpponentGrid));
+            }
+        }
+        
         public GameViewModel(GameModel gameModel, IClient client)
         {
             this.client = client;
             this.gameModel = gameModel;
-            fireTimeoutTimer = new PeriodicalTimer(TimeSpan.FromSeconds(1), UpdateYourChoiceFormattedStatusAsync, fireTimeout, RandomFireAsync, SetOpponentChoiceFormattedStatusAsync);
+            fireTimeoutTimer = new PeriodicalTimer(TimeSpan.FromSeconds(1), UpdateYourChoiceFormattedStatusAsync,
+                fireTimeout, RandomFireAsync, SetOpponentChoiceFormattedStatusAsync);
             OpponentMap = Map.Empty;
             Task.Run(async () => await GetStatusAsync());
             SetOpponentChoiceFormattedStatusAsync();
@@ -65,9 +86,7 @@ namespace SeaWar.ViewModels
             }
         }
 
-        public Map MyMap { get; set; }
-        public Map OpponentMap { get; set; }
-
+        [NotifyPropertyChangedInvocator]
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -75,7 +94,7 @@ namespace SeaWar.ViewModels
 
         private async Task FireAsync(int x, int y)
         {
-            //TODO Задизейблить контролы
+            DisabledOpponentGrid = true;
             await fireTimeoutTimer.Stop();
 
             //TODO нужно "запретить" стрелять по клетке, по которой уже стрелял
@@ -87,7 +106,7 @@ namespace SeaWar.ViewModels
             };
             var fireResult = await client.FireAsync(parameters);
             OpponentMap = fireResult.OpponentMap.ToModel();
-            
+
             //ToDo redraw
             await GetStatusAsync();
         }
@@ -112,7 +131,7 @@ namespace SeaWar.ViewModels
                 {
                     case GameStatus.YourChoise:
                         await fireTimeoutTimer.Start();
-                        //TODO Раздизейблить контролы
+                        DisabledOpponentGrid = false;
                         return;
                     case GameStatus.PendingForFriendChoise:
                         break;
@@ -156,7 +175,7 @@ namespace SeaWar.ViewModels
                 {
                     var image = new Image()
                     {
-                        Source = "empty_cell.jpg"
+                        Source = emptyImageSource
                     };
 
                     var tapGestureRecognizer = new TapGestureRecognizer();
@@ -170,14 +189,14 @@ namespace SeaWar.ViewModels
                             var x = cellPosition.X;
                             var y = cellPosition.Y;
                             var tapImage = (Image) sender;
-                            tapImage.Source = ImageSource.FromFile("miss_cell.jpg");
-                            
-                            await FireAsync(x,y);
+                            tapImage.Source = missImageSource;
+
+                            await FireAsync(x, y);
                         };
                     }
 
                     image.GestureRecognizers.Add(tapGestureRecognizer);
-                    grid.Children.Add(image,i,j);
+                    grid.Children.Add(image, i, j);
                 }
             }
         }

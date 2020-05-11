@@ -24,6 +24,7 @@ namespace SeaWar.View
             base.OnAppearing();
             Model.InitGrid(PlayerGrid, false);
             Model.InitGrid(AnotherPlayerGrid, true);
+            Model.UpdateGrid(PlayerGrid, Model.MyMap);
         }
 
         private void NotifyPropertyChangedOnPropertyChanged(object sender, PropertyChangedEventArgs e)
