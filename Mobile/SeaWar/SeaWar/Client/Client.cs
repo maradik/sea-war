@@ -10,9 +10,10 @@ namespace SeaWar.Client
     public class Client : IClient
     {
         private readonly HttpClient httpClient;
-        public Client(string baseUri)
+        public Client(string baseUri, TimeSpan timeout)
         {
             httpClient = new HttpClient {BaseAddress = new Uri(baseUri)};
+            httpClient.Timeout = timeout;
         }
 
         public async Task<RoomResponse> CreateRoomAsync(CreateRoomParameters parameters)
