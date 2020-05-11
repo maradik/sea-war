@@ -196,7 +196,6 @@ namespace SeaWar.ViewModels
                             var x = cellPosition.X;
                             var y = cellPosition.Y;
                             var tapImage = (Image) sender;
-                            tapImage.Source = missImageSource;
                             
                             //если кликаем не по пустой ячейке, то ничего не делаем
                             if (!IsEqualsImageSources(tapImage.Source, emptyImageSource))
@@ -216,6 +215,11 @@ namespace SeaWar.ViewModels
 
         public void UpdateGrid(Grid grid, Map map)
         {
+            if (grid.Children.Count == 0)
+            {
+                return;
+            }
+            
             var cells = map.Cells;
             for (int i = 0; i < GameModel.MapHorizontalSize; i++)
             {
