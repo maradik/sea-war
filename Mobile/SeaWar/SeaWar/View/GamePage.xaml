@@ -17,7 +17,7 @@
         <Label Text="{Binding OpponentName}" Grid.Column="1" Grid.Row="0" HorizontalOptions="Center" VerticalOptions="Center" />
         
         <!-- Добавить IsEnabled для блокировки карты? -->
-        <CollectionView ItemsSource="{Binding MyMap.Cells}" Grid.Column="0" Grid.Row="1" IsEnabled="{Binding}">
+        <CollectionView ItemsSource="{Binding Cells}" Grid.Column="0" Grid.Row="1" IsEnabled="{Binding}" Margin="0" BackgroundColor="Aquamarine">
             <CollectionView.ItemsLayout>
                 <GridItemsLayout Orientation="Horizontal" Span="10" />
             </CollectionView.ItemsLayout>
@@ -25,15 +25,15 @@
                 <DataTemplate>
                     <!-- ВАЖНО! Такой подход работает с массивом массивов -->
                     <!-- Для отрисовки многомерного массива, возможно, даже не нужно вложенности. Не успел попробовать -->
-                    <CollectionView ItemsSource="{Binding .}">
+                    <CollectionView ItemsSource="{Binding .}" Margin="0" BackgroundColor="Chocolate">
                         <CollectionView.ItemsLayout>
-                            <GridItemsLayout Orientation="Vertical" Span="10" />
+                            <GridItemsLayout Orientation="Vertical" Span="10"/>
                         </CollectionView.ItemsLayout>
                         <CollectionView.ItemTemplate>
                             <DataTemplate>
                                 <!-- Должно быть что-то такое: картинка, по которой можно тапнуть -->
                                 <!-- Добавить IsEnabled для блокировки елемента, по которому стреляли, а также ImageSource и Command в тип Cell?  -->
-                                <Image Source="{Binding}" Height="" Width="" IsEnabled="{Binding}">
+                                <Image Source="empty_cell.jpg" Margin="0">
                                     <Image.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding}"></TapGestureRecognizer>
                                     </Image.GestureRecognizers>

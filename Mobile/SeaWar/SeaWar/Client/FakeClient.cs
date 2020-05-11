@@ -22,7 +22,7 @@ namespace SeaWar.Client
         public Task<RoomResponse> GetRoomStatusAsync(GetRoomStatusParameters parameters)
         {
             countTryReadyToPlay++;
-            var status = countTryReadyToPlay > 3
+            var status = countTryReadyToPlay > 1
                 ? CreateRoomStatus.ReadyForStart
                 : CreateRoomStatus.WaitingForAnotherPlayer;
             
