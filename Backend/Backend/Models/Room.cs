@@ -29,7 +29,7 @@ namespace Backend.Models
                 }
             }
 
-            return enemyPlayer.EnemyMap;
+            return enemyPlayer.OwnMap;
         }
     }
 }

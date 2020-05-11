@@ -15,8 +15,7 @@ namespace Backend.Controllers
             {
                 Id = Guid.NewGuid(),
                 Name = playerName,
-                OwnMap = mapBuilder.Build(),
-                EnemyMap = null
+                OwnMap = mapBuilder.Build()
             };
     }
 }

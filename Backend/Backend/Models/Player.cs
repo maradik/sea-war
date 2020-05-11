@@ -7,7 +7,6 @@ namespace Backend.Models
         public Guid Id { get; set; }
         public string Name { get; set; }
         public Map OwnMap { get; set; }
-        public Map EnemyMap { get; set; }
 
         public CellStatus ProcessEnemyMove(int x, int y)
         {
