@@ -25,14 +25,14 @@ namespace Backend.Controllers
             {
                 var room = rooms[roomId];
                 var enemyMap = playerId == room.Player1.Id ? room.Player2.OwnMap : room.Player1.OwnMap;
-                if (enemyMap.Cells[dto.Y, dto.X].Status == Cell.CellStatus.Empty)
+                if (enemyMap.Cells[dto.Y, dto.X].Status == CellStatus.Empty)
                 {
-                    enemyMap.Cells[dto.Y, dto.X].Status = Cell.CellStatus.EmptyFired;
+                    enemyMap.Cells[dto.Y, dto.X].Status = CellStatus.EmptyFired;
                     room.CurrentPlayerId = playerId == room.Player1.Id ? room.Player2.Id : room.Player1.Id;
                 }
-                else if (enemyMap.Cells[dto.Y, dto.X].Status == Cell.CellStatus.EngagedByShip)
+                else if (enemyMap.Cells[dto.Y, dto.X].Status == CellStatus.EngagedByShip)
                 {
-                    enemyMap.Cells[dto.Y, dto.X].Status = Cell.CellStatus.EngagedByShipFired;
+                    enemyMap.Cells[dto.Y, dto.X].Status = CellStatus.EngagedByShipFired;
                 }
 
                 return new FireResponseDto
@@ -57,7 +57,7 @@ namespace Backend.Controllers
 
                 return new GetGameStatusResponseDto
                 {
-                    YourChoiceTimeout = gameStatus == GameStatus.YourChoice ? TimeSpan.FromMinutes(1) : TimeSpan.MaxValue,
+                    YourChoiceTimeout = gameStatus == GameStatus.YourChoice ? TimeSpan.FromMinutes(1) : TimeSpan.Zero,
                     MyMap = room.Player1.Id == playerId ? room.Player1.OwnMap : room.Player2.OwnMap,
                     GameStatus = gameStatus,
                     FinishReason = null

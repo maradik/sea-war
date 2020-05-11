@@ -1,3 +1,4 @@
+using System;
 using Backend.Models;
 
 namespace Backend.Controllers
@@ -13,14 +14,15 @@ namespace Backend.Controllers
                 {
                     cells[i, j] = new Cell
                     {
-                        Status = Cell.CellStatus.Empty
+                        Status = CellStatus.Empty
                     };
                 }
             }
 
             return new Map
             {
-                Cells = cells
+                Cells = cells,
+                Ships = Array.Empty<Ship>()
             };
         }
     }
