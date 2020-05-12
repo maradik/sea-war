@@ -31,12 +31,13 @@ namespace SeaWar.View
         {
             if (e.PropertyName == nameof(Model.OpponentMap))
             {
-                Model.UpdateGrid(AnotherPlayerGrid, Model.OpponentMap);    
+                Device.BeginInvokeOnMainThread(() =>
+                    Model.UpdateGrid(AnotherPlayerGrid, Model.OpponentMap));
             }
-            
+
             if (e.PropertyName == nameof(Model.MyMap))
             {
-                Model.UpdateGrid(PlayerGrid, Model.MyMap);    
+                Device.BeginInvokeOnMainThread(() => Model.UpdateGrid(PlayerGrid, Model.MyMap));
             }
         }
     }
