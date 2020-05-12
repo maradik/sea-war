@@ -11,15 +11,23 @@ namespace SeaWar
         protected override void Load(ContainerBuilder builder)
         {
             // builder.RegisterType<FakeClient>().As<IClient>().SingleInstance();
-            builder.RegisterType<RetryableClient>()
-                   .As<IClient>()
-                   .WithParameters(new []
-                   {
-                       new NamedParameter("client", new Client.Client(Settings.ServerUri, Settings.Timeout)),
-                       new NamedParameter("retryCount", 5)
-                   })
-                   .SingleInstance();
+            builder.Register(context =>
+                {
+                    var logger = context.Resolve<ILogger>();
+                    return new RetryableClient(new Client.Client(Settings.ServerUri, Settings.Timeout, logger),
+                        retryCount: 5);
+                })
+                .As<IClient>()
+                .SingleInstance();
 
+            builder.RegisterType<Logger>()
+                .As<ILogger>()
+                .WithParameters(new []
+                {
+                    new NamedParameter("context", "SeaWar"),
+                })
+                .SingleInstance();
+            
             builder.RegisterType<WelcomePage>().AsSelf();
             builder.RegisterType<WelcomePageModelView>().AsSelf();
 

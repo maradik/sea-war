@@ -11,14 +11,16 @@ namespace SeaWar.ViewModels
     public class WaitGamePageViewModel
     {
         private readonly IClient client;
+        private readonly ILogger logger;
         private readonly GameModel gameModel;
         private readonly Func<GameModel, GamePage> createGamePage;
         private Task waitAnotherPlayerTask;
         private int millisecondsForRepeatServerRequest = 2 * 1000;
 
-        public WaitGamePageViewModel(GameModel gameModel, Func<GameModel, GamePage> createGamePage, IClient client)
+        public WaitGamePageViewModel(GameModel gameModel, Func<GameModel, GamePage> createGamePage, IClient client, ILogger logger)
         {
             this.client = client;
+            this.logger = logger.WithContext(nameof(WaitGamePageViewModel));
             this.gameModel = gameModel;
             this.createGamePage = createGamePage;
         }
@@ -48,7 +50,7 @@ namespace SeaWar.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    //TODO logging
+                    logger.Info(ex.ToString());
                 }
             }
         }
