@@ -42,6 +42,7 @@ namespace Backend.Models
             Player2 = player;
             Status = RoomStatus.Ready;
             CurrentPlayerId = Player1.Id;
+            LastMoveTicks = DateTime.Now.Ticks;
 
             return new CreateRoomResponseDto
             {
