@@ -216,7 +216,7 @@ namespace SeaWar.ViewModels
 
         public void UpdateGrid(Grid grid, Map map)
         {
-            if (grid.Children.Count == 0)
+            if (grid.Children.Count == 0 || grid.Children.Count < GameModel.MapHorizontalSize * GameModel.MapVerticalSize)
             {
                 return;
             }
@@ -227,7 +227,7 @@ namespace SeaWar.ViewModels
                 for (int j = 0; j < GameModel.MapVerticalSize; j++)
                 {
                     var cell = cells[i, j];
-                    var positionFlat = i*GameModel.MapVerticalSize + j;
+                    var positionFlat = i * GameModel.MapVerticalSize + j;
                     var child = grid.Children[positionFlat];
                     var image = (Image) child;
 
