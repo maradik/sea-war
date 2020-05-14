@@ -187,8 +187,7 @@ namespace SeaWar.ViewModels
                     };
 
                     var tapGestureRecognizer = new TapGestureRecognizer();
-                    //TODO поменял местами i и j, но надо разобраться где не верно координаты используются
-                    var cellPosition = new CellPosition(j, i);
+                    var cellPosition = new CellPosition(i, j);
 
                     if (useTapAction)
                     {
