@@ -81,6 +81,7 @@ namespace SeaWar.Extensions
                 EnemyCellStatus.Unknown => CellStatus.Empty,
                 EnemyCellStatus.Missed => CellStatus.Missed,
                 EnemyCellStatus.Damaged => CellStatus.Damaged,
+                EnemyCellStatus.ShipNeighbour => CellStatus.Missed,
                 _ => throw new ArgumentException()
             };
 
