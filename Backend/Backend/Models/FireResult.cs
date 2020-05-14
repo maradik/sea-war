@@ -4,6 +4,7 @@ namespace Backend.Models
     {
         Missed,
         Damaged,
-        Killed
+        Killed,
+        NeedRetry
     }
 }

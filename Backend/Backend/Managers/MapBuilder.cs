@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Backend.Models;
 
 namespace Backend.Managers
@@ -27,6 +28,8 @@ namespace Backend.Managers
                 {
                     cells[i, j] = new Cell
                     {
+                        X = j,
+                        Y = i,
                         Status = CellStatus.Empty
                     };
                 }
@@ -47,16 +50,24 @@ namespace Backend.Managers
                 [4] = GenerateAllPositions(4)
             };
 
+            var random = new Random();
             for (var i = 0; i < 10; ++i)
             {
                 var size = sizes[i];
                 var allPossiblePositions = possiblePositions[size];
-                foreach (var position in allPossiblePositions)
+
+                var startIndex = random.Next() % allPossiblePositions.Count;
+                var c = 0;
+
+                for (var j = startIndex; c < allPossiblePositions.Count; j = (j + 1) % allPossiblePositions.Count)
                 {
+                    var position = allPossiblePositions[j];
                     if (map.TryAddShip(position))
                     {
                         break;
                     }
+
+                    c++;
                 }
             }
         }

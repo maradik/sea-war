@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using Backend.Controllers.Dto;
 
@@ -11,6 +12,23 @@ namespace Backend.Models
         public bool IsEmpty(int x, int y) =>
             Cells[y, x].Status == CellStatus.Empty;
 
+        public Cell[] GetCellNeighbours(Cell cell)
+        {
+            var result = new List<Cell>();
+            for (var i = -1; i <= 1; ++i)
+            {
+                for (var j = -1; j <= 1; ++j)
+                {
+                    if (i == 0 && j == 0)
+                        continue;
+                    if (cell.X + i >= 0 && cell.X + i < 10 && cell.Y + j >= 0 && cell.Y + j < 10)
+                        result.Add(Cells[cell.Y + j, cell.X + i]);
+                }
+            }
+
+            return result.ToArray();
+        }
+
         public bool HasAliveShip() =>
             Ships.Any(ship => ship.Status == ShipStatus.Alive);
 
@@ -21,28 +39,20 @@ namespace Backend.Models
             Cells[y, x].Status = Cells[y, x].Status == CellStatus.Empty ? CellStatus.EmptyFired : CellStatus.EngagedByShipFired;
 
         public Ship GetShip(int x, int y) =>
-            Ships.First(ship => ship.Cells.Any(cell => cell.X == x && cell.Y == y));
+            Ships.Single(ship => ship.Cells.Any(cell => cell.X == x && cell.Y == y));
 
         public void DismissShipNeighbours(int x, int y)
         {
             var ship = GetShip(x, y);
-            foreach (var cell in ship.Cells)
+            var allNeighbours = ship.Cells
+                                    .SelectMany(GetCellNeighbours)
+                                    .Where(neighbour => !ship.ContainsCell(neighbour.X, neighbour.Y));
+
+            foreach (var neighbour in allNeighbours)
             {
-                for (var i = -1; i <= 1; ++i)
-                {
-                    for (var j = -1; j <= 1; ++j)
-                    {
-                        if (i == 0 && j == 0)
-                            continue;
-                        if (cell.X + i >= 0 && cell.X + i < 10 && cell.Y + j >= 0 && cell.Y + j < 10)
-                        {
-                            if (Cells[cell.Y + j, cell.X + i].Status == CellStatus.Empty)
-                                Cells[cell.Y + j, cell.X + i].Status = CellStatus.ShipNeighbour;
+                Cells[neighbour.Y, neighbour.X].Status = CellStatus.ShipNeighbour;
                         }
                     }
-                }
-            }
-        }
 
         public bool TryAddShip(Ship ship)
         {
@@ -104,6 +114,7 @@ namespace Backend.Models
                         {
                             CellStatus.EmptyFired => CellForEnemyDtoStatus.Missed,
                             CellStatus.EngagedByShipFired => CellForEnemyDtoStatus.Damaged,
+                            CellStatus.ShipNeighbour => CellForEnemyDtoStatus.ShipNeighbour,
                             _ => CellForEnemyDtoStatus.Unknown
                         }
                     };
