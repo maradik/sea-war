@@ -2,37 +2,77 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using SeaWar.Annotations;
 using SeaWar.Client;
 using SeaWar.Client.Contracts;
 using SeaWar.DomainModels;
 using SeaWar.Extensions;
+using SeaWar.View;
+using Xamarin.Forms;
 
 namespace SeaWar.ViewModels
 {
     public class GameViewModel : INotifyPropertyChanged
     {
         private static readonly Random random = new Random();
-        private static readonly TimeSpan fireTimeout = TimeSpan.FromSeconds(10);
+        private static readonly TimeSpan fireTimeout = TimeSpan.FromSeconds(15);
         private static readonly TimeSpan periodOfStatusPolling = TimeSpan.FromSeconds(1);
+
+        private ImageSource danageImageSource = ImageSource.FromFile("damage.jpg");
+        private ImageSource emptyImageSource = ImageSource.FromFile("empty_cell.jpg");
+        private ImageSource shipImageSource = ImageSource.FromFile("ship_cell.jpg");
+        private ImageSource missImageSource = ImageSource.FromFile("miss_cell.jpg");
 
         private readonly IClient client;
         private readonly PeriodicalTimer fireTimeoutTimer;
         private string formattedStatus;
-        private string formattedTimeoutRemain;
         private readonly GameModel gameModel;
+        private readonly Func<GameModel, FinishPage> createFinishPage;
 
-        //TODO Для тестовых целей только!!! Настоящие карты лежат в MyMap и OpponentMap.
-        //TODO Выпилить, когда в GamePage.xaml замкнем отрисовку на настоящие карты
-        public Cell[][] Cells { get; } = {
-            new[]{new Cell {Status = CellStatus.Damaged}, new Cell {Status = CellStatus.Empty}, new Cell()},
-            new[]{new Cell {Status = CellStatus.Missed}, new Cell {Status = CellStatus.Filled}, new Cell()}
-        };
+        private Map myMap;
+        private Map opponentMap;
+        private bool enabledOpponentGrid;
 
-        public GameViewModel(IClient client, GameModel gameModel)
+        public Map OpponentMap
+        {
+            get => opponentMap;
+            set
+            {
+                opponentMap = value;
+                OnPropertyChanged(nameof(OpponentMap));
+            }
+        }
+
+        public Map MyMap
+        {
+            get => myMap;
+            set
+            {
+                myMap = value;
+                OnPropertyChanged(nameof(MyMap));
+            }
+        }
+
+        public bool EnabledOpponentGrid
+        {
+            get => enabledOpponentGrid;
+            set
+            {
+                enabledOpponentGrid = value;
+                OnPropertyChanged(nameof(EnabledOpponentGrid));
+            }
+        }
+        
+        public GameViewModel(GameModel gameModel, Func<GameModel, FinishPage> createFinishPage, IClient client)
         {
             this.client = client;
             this.gameModel = gameModel;
-            fireTimeoutTimer = new PeriodicalTimer(TimeSpan.FromSeconds(1), UpdateFormattedTimeoutRemainAsync, fireTimeout, RandomFireAsync);
+            this.createFinishPage = createFinishPage;
+            fireTimeoutTimer = new PeriodicalTimer(TimeSpan.FromSeconds(1), UpdateYourChoiceFormattedStatusAsync, fireTimeout, RandomFireAsync, SetOpponentChoiceFormattedStatusAsync);
+            OpponentMap = Map.Empty;
+            MyMap = Map.Empty;
+            Task.Run(async () => await GetStatusAsync());
+            SetOpponentChoiceFormattedStatusAsync();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -49,19 +89,7 @@ namespace SeaWar.ViewModels
             }
         }
 
-        public string FormattedTimeoutRemain
-        {
-            get => formattedTimeoutRemain;
-            set
-            {
-                formattedTimeoutRemain = value;
-                OnPropertyChanged(nameof(FormattedTimeoutRemain));
-            }
-        }
-
-        public Map MyMap { get; set; }
-        public Map OpponentMap { get; set; }
-
+        [NotifyPropertyChangedInvocator]
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -69,8 +97,10 @@ namespace SeaWar.ViewModels
 
         private async Task FireAsync(int x, int y)
         {
-            //TODO Задизейблить контролы
-            fireTimeoutTimer.Stop();
+            EnabledOpponentGrid = false;
+            await fireTimeoutTimer.Stop();
+
+            //TODO нужно "запретить" стрелять по клетке, по которой уже стрелял
             var parameters = new FireParameters
             {
                 RoomId = gameModel.RoomId,
@@ -78,7 +108,7 @@ namespace SeaWar.ViewModels
                 FieredCell = new CellPosition(x, y)
             };
             var fireResult = await client.FireAsync(parameters);
-            OpponentMap = fireResult.OpponentMap.ToModel();
+            OpponentMap = fireResult.EnemyMap.ToModel();
 
             //ToDo redraw
             await GetStatusAsync();
@@ -93,22 +123,28 @@ namespace SeaWar.ViewModels
                     RoomId = gameModel.RoomId,
                     PlayerId = gameModel.PlayerId
                 };
+
                 var gameStatus = await client.GetGameStatusAsync(parameters);
+                if (gameStatus.MyMap != null)
+                {
+                    MyMap = gameStatus.MyMap.ToModel();
+                }
 
                 switch (gameStatus.GameStatus)
                 {
-                    case GameStatus.YourChoise:
-                        MyMap = gameStatus.MyMap.ToModel();
-                        FormattedStatus = "Твой ход";
-                        fireTimeoutTimer.Start();
-                        //TODO Раздизейблить контролы
+                    case GameStatus.YourChoice:
+                        await fireTimeoutTimer.Start();
+                        EnabledOpponentGrid = true;
                         return;
-                    case GameStatus.PendingForFriendChoise:
-                        FormattedStatus = "Ход соперника";
-                        FormattedTimeoutRemain = string.Empty;
+                    case GameStatus.PendingForFriendChoice:
                         break;
                     case GameStatus.Finish:
-                        //TODO GoTo Finish screen
+                        gameModel.MyMap = MyMap;
+                        gameModel.OpponentMap = OpponentMap;
+                        gameModel.FinishReason = gameStatus.FinishReason.ToModel();
+                        Device.BeginInvokeOnMainThread(async () => {
+                            await Application.Current.MainPage.Navigation.PushModalAsync(createFinishPage(gameModel));
+                        });
                         return;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -118,18 +154,111 @@ namespace SeaWar.ViewModels
             }
         }
 
-        private Task UpdateFormattedTimeoutRemainAsync(TimeSpan remain)
+        private Task UpdateYourChoiceFormattedStatusAsync(TimeSpan remain)
         {
-            FormattedTimeoutRemain = remain.ToString();
+            FormattedStatus = $"Ходи {remain.TotalSeconds.ToString("0")}";
             return Task.CompletedTask;
         }
 
         private async Task RandomFireAsync()
         {
-            FormattedTimeoutRemain = String.Empty;
+            //TODO нужно "запретить" стрелять по клетке, по которой уже стрелял
             var x = random.Next(OpponentMap.Cells.GetLength(0));
             var y = random.Next(OpponentMap.Cells.GetLength(1));
+
             await FireAsync(x, y);
+        }
+
+        private Task SetOpponentChoiceFormattedStatusAsync()
+        {
+            FormattedStatus = "Ход соперника";
+            return Task.CompletedTask;
+        }
+
+        public void InitGrid(Grid grid, bool useTapAction)
+        {
+            for (int i = 0; i < GameModel.MapHorizontalSize; i++)
+            {
+                for (int j = 0; j < GameModel.MapVerticalSize; j++)
+                {
+                    var image = new Image()
+                    {
+                        Source = emptyImageSource
+                    };
+
+                    var tapGestureRecognizer = new TapGestureRecognizer();
+                    var cellPosition = new CellPosition(i, j);
+
+                    if (useTapAction)
+                    {
+                        tapGestureRecognizer.Tapped += async (sender, eventArgs) =>
+                        {
+                            // handle the tap
+                            var x = cellPosition.X;
+                            var y = cellPosition.Y;
+                            var tapImage = (Image) sender;
+                            
+                            //если кликаем не по пустой ячейке, то ничего не делаем
+                            if (!IsEqualsImageSources(tapImage.Source, emptyImageSource))
+                            {
+                                return;
+                            }
+                            
+                            await FireAsync(x, y);
+                        };
+                    }
+
+                    image.GestureRecognizers.Add(tapGestureRecognizer);
+                    grid.Children.Add(image, i, j);
+                }
+            }
+        }
+
+        public void UpdateGrid(Grid grid, Map map)
+        {
+            if (grid.Children.Count == 0 || grid.Children.Count < GameModel.MapHorizontalSize * GameModel.MapVerticalSize)
+            {
+                return;
+            }
+            
+            var cells = map.Cells;
+            for (int i = 0; i < GameModel.MapHorizontalSize; i++)
+            {
+                for (int j = 0; j < GameModel.MapVerticalSize; j++)
+                {
+                    var cell = cells[i, j];
+                    var positionFlat = i * GameModel.MapVerticalSize + j;
+                    var child = grid.Children[positionFlat];
+                    var image = (Image) child;
+
+                    var imageSource = emptyImageSource;
+                    switch (cell.Status)
+                    {
+                        case CellStatus.Damaged:
+                            imageSource = danageImageSource;
+                            break;
+                        case CellStatus.Filled:
+                            imageSource = shipImageSource;
+                            break;
+                        case CellStatus.Missed:
+                            imageSource = missImageSource;
+                            break;
+                        default:
+                            imageSource = emptyImageSource;
+                            break;
+                    }
+
+                    if (!IsEqualsImageSources(image.Source, imageSource))
+                    {
+                        image.Source = imageSource;
+                    }
+                }
+            }
+        }
+
+        private bool IsEqualsImageSources(ImageSource sourceA, ImageSource sourceB)
+        {
+            return (((FileImageSource) sourceA).File == ((FileImageSource) sourceB).File);
         }
     }
 }

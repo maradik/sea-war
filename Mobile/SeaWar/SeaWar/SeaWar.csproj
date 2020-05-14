@@ -39,4 +39,26 @@
         <DependentUpon>GamePage.xaml</DependentUpon>
       </Compile>
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Images" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="images\empty_cell.jpg">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Images\miss_cell.jpg">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Images\ship_cell.jpg">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Images\killed.jpg">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Images\damage.jpg">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
 </Project>

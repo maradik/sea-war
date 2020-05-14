@@ -67,6 +67,11 @@
         <None Include="Properties\AndroidManifest.xml" />
     </ItemGroup>
     <ItemGroup>
+        <AndroidResource Include="Resources\drawable\damage.jpg" />
+        <AndroidResource Include="Resources\drawable\empty_cell.jpg" />
+        <AndroidResource Include="Resources\drawable\killed.jpg" />
+        <AndroidResource Include="Resources\drawable\miss_cell.jpg" />
+        <AndroidResource Include="Resources\drawable\ship_cell.jpg" />
         <AndroidResource Include="Resources\drawable\ship.png" />
         <AndroidResource Include="Resources\drawable\splash_screen_land.xml" />
         <AndroidResource Include="Resources\layout\Tabbar.axml" />

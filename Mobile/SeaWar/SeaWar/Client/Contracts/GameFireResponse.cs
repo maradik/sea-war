@@ -2,6 +2,6 @@
 {
     public class GameFireResponse
     {
-        public Map OpponentMap { get; }
+        public EnemyMap EnemyMap { get; set; }
     }
 }

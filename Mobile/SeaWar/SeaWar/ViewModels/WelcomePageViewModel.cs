@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using SeaWar.Annotations;
 using SeaWar.Client;
@@ -16,7 +17,7 @@ namespace SeaWar.ViewModels
 
         private const int minUserNameLength = 5;
         private const string validateMessage = "Имя игрока должно быть не меньше 5 символов";
-        
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         private string _playerName;
@@ -55,14 +56,14 @@ namespace SeaWar.ViewModels
 
         public Command StartGame { get; }
 
-        public WelcomePageModelView(GameModel gameModel, WaitGamePage waitGamePage, GamePage gamePage, IClient client)
+        public WelcomePageModelView(GameModel gameModel, Func<GameModel, WaitGamePage> createWaitGamePage, Func<GameModel, GamePage> createGamePage, IClient client)
         {
             this.client = client;
 
             StartGame = new Command(async _ =>
             {
                 SavePlayerName();
-                
+
                 var parameters = new CreateRoomParameters
                 {
                     PlayerName = PlayerName
@@ -73,13 +74,13 @@ namespace SeaWar.ViewModels
                 gameModel.RoomId = createRoomResponse.RoomId;
                 gameModel.AnotherPlayerName = createRoomResponse.AnotherPlayerName;
 
-                if (createRoomResponse.Status == CreateRoomStatus.ReadyForStart)
+                if (createRoomResponse.RoomStatus == CreateRoomStatus.Ready)
                 {
-                    await Application.Current.MainPage.Navigation.PushModalAsync(gamePage);
+                    await Application.Current.MainPage.Navigation.PushModalAsync(createGamePage(gameModel));
                 }
                 else
                 {
-                    await Application.Current.MainPage.Navigation.PushModalAsync(waitGamePage);
+                    await Application.Current.MainPage.Navigation.PushModalAsync(createWaitGamePage(gameModel));
                 }
             });
         }

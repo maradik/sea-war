@@ -10,7 +10,7 @@ namespace Backend.Models
         public Ship[] Ships { get; set; }
 
         public bool IsEmpty(int x, int y) =>
-            Cells[y, x].Status == CellStatus.Empty;
+            Cells[x, y].Status == CellStatus.Empty;
 
         public Cell[] GetCellNeighbours(Cell cell)
         {
@@ -22,7 +22,7 @@ namespace Backend.Models
                     if (i == 0 && j == 0)
                         continue;
                     if (cell.X + i >= 0 && cell.X + i < 10 && cell.Y + j >= 0 && cell.Y + j < 10)
-                        result.Add(Cells[cell.Y + j, cell.X + i]);
+                        result.Add(Cells[cell.X + i, cell.Y + j]);
                 }
             }
 
@@ -33,10 +33,10 @@ namespace Backend.Models
             Ships.Any(ship => ship.Status == ShipStatus.Alive);
 
         public bool HasShip(int x, int y) =>
-            Cells[y, x].Status == CellStatus.EngagedByShip;
+            Cells[x, y].Status == CellStatus.EngagedByShip;
 
         public void Fire(int x, int y) =>
-            Cells[y, x].Status = Cells[y, x].Status == CellStatus.Empty ? CellStatus.EmptyFired : CellStatus.EngagedByShipFired;
+            Cells[x, y].Status = Cells[x, y].Status == CellStatus.Empty ? CellStatus.EmptyFired : CellStatus.EngagedByShipFired;
 
         public Ship GetShip(int x, int y) =>
             Ships.Single(ship => ship.Cells.Any(cell => cell.X == x && cell.Y == y));
@@ -50,7 +50,7 @@ namespace Backend.Models
 
             foreach (var neighbour in allNeighbours)
             {
-                Cells[neighbour.Y, neighbour.X].Status = CellStatus.ShipNeighbour;
+                Cells[neighbour.X, neighbour.Y].Status = CellStatus.ShipNeighbour;
             }
         }
 
@@ -58,7 +58,7 @@ namespace Backend.Models
         {
             foreach (var cell in ship.Cells)
             {
-                if (Cells[cell.Y, cell.X].Status != CellStatus.Empty)
+                if (Cells[cell.X, cell.Y].Status != CellStatus.Empty)
                     return false;
                 for (var i = -1; i <= 1; ++i)
                 {
@@ -68,7 +68,7 @@ namespace Backend.Models
                             continue;
                         if (cell.X + i >= 0 && cell.X + i < 10 && cell.Y + j >= 0 && cell.Y + j < 10)
                         {
-                            if (Cells[cell.Y + j, cell.X + i].Status != CellStatus.Empty)
+                            if (Cells[cell.X + i, cell.Y + j].Status != CellStatus.Empty)
                                 return false;
                         }
                     }
@@ -77,7 +77,7 @@ namespace Backend.Models
 
             foreach (var cell in ship.Cells)
             {
-                Cells[cell.Y, cell.X].Status = CellStatus.EngagedByShip;
+                Cells[cell.X, cell.Y].Status = CellStatus.EngagedByShip;
             }
 
             Ships = Ships.Append(ship).ToArray();

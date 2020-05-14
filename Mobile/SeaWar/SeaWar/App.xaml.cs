@@ -1,5 +1,8 @@
-﻿using Autofac;
+﻿using System;
+using Autofac;
+using SeaWar.DomainModels;
 using SeaWar.View;
+using SeaWar.ViewModels;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -14,13 +17,19 @@ namespace SeaWar
         public App()
         {
             InitializeComponent();
-
             var containerBuilder = new ContainerBuilder();
             containerBuilder.RegisterModule<AutofacModule>();
             Container = containerBuilder.Build();
-            MainPage = new NavigationPage(Container.Resolve<WelcomePage>());
+            BeginGame();
         }
 
+        public void BeginGame()
+        {
+            var gameModel = new GameModel();
+            var createWelcomePage = Container.Resolve<Func<GameModel, WelcomePage>>();
+            MainPage = new NavigationPage(createWelcomePage(gameModel));
+        }
+        
         protected override void OnStart()
         {
             // Handle when your app starts

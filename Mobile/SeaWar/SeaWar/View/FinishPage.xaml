@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="SeaWar.View.FinishPage" BackgroundColor="#dee0e6">
+    <ContentPage.Content>
+        <StackLayout Margin="20" BackgroundColor="#dee0e6">
+            <StackLayout HorizontalOptions="Center">
+                <Label Text="Игра окончена" FontSize="10" HorizontalOptions="Center"/>
+                <Label Text="{Binding FormattedReason}" FontSize="22" TextColor="Red" HorizontalOptions="Center"/>
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+
+                    <Label Text="Мои попадания:" Grid.Column="0" Grid.Row="0" FontSize="8" HorizontalOptions="End"/>
+                    <Label Text="Мои промахи:" Grid.Column="0" Grid.Row="1" FontSize="8" HorizontalOptions="End"/>
+                    <Label Text="Вражеские попадания:" Grid.Column="0" Grid.Row="2" FontSize="8" HorizontalOptions="End"/>
+                    <Label Text="Вражеские промахи:" Grid.Column="0" Grid.Row="3" FontSize="8" HorizontalOptions="End"/>
+                    
+                    <Label Text="{Binding MyDamagesCount}" Grid.Column="1" Grid.Row="0" FontSize="8" HorizontalOptions="Start"/>
+                    <Label Text="{Binding MyMissesCount}" Grid.Column="1" Grid.Row="1" FontSize="8" HorizontalOptions="Start"/>
+                    <Label Text="{Binding OpponentDamagesCount}" Grid.Column="1" Grid.Row="2" FontSize="8" HorizontalOptions="Start"/>
+                    <Label Text="{Binding OpponentMissesCount}" Grid.Column="1" Grid.Row="3" FontSize="8" HorizontalOptions="Start"/>
+                </Grid>
+
+                <Button Text="Начать заново" 
+                        Command="{Binding RestartGame}" 
+                        HorizontalOptions="Center" 
+                        FontSize="22"
+                        BackgroundColor="#ffa822"
+                        TextColor="White" 
+                        CornerRadius="5"/>
+            </StackLayout>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

@@ -6,11 +6,11 @@ using Android.App;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("SeaWar.Android")]
+[assembly: AssemblyTitle("SeaWar")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("CompanyName")]
-[assembly: AssemblyProduct("SeaWar.Android")]
+[assembly: AssemblyProduct("SeaWar")]
 [assembly: AssemblyCopyright("Copyright © CompanyName Year")]
 [assembly: AssemblyTrademark("CompanyTrademark")]
 [assembly: AssemblyCulture("")]
