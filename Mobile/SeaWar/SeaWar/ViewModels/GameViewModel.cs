@@ -19,21 +19,42 @@ namespace SeaWar.ViewModels
         private static readonly TimeSpan fireTimeout = TimeSpan.FromSeconds(15);
         private static readonly TimeSpan periodOfStatusPolling = TimeSpan.FromSeconds(1);
 
-        private ImageSource danageImageSource = ImageSource.FromFile("damage.jpg");
-        private ImageSource emptyImageSource = ImageSource.FromFile("empty_cell.jpg");
-        private ImageSource shipImageSource = ImageSource.FromFile("ship_cell.jpg");
-        private ImageSource missImageSource = ImageSource.FromFile("miss_cell.jpg");
-
         private readonly IClient client;
         private readonly PeriodicalTimer fireTimeoutTimer;
-        private string formattedStatus;
         private readonly GameModel gameModel;
         private readonly Func<GameModel, FinishPage> createFinishPage;
         private readonly CancellationTokenSource pageCancellationTokenSource = new CancellationTokenSource();
 
+        private readonly ImageSource danageImageSource = ImageSource.FromFile("damage.jpg");
+        private readonly ImageSource emptyImageSource = ImageSource.FromFile("empty_cell.jpg");
+        private readonly ImageSource shipImageSource = ImageSource.FromFile("ship_cell.jpg");
+        private readonly ImageSource missImageSource = ImageSource.FromFile("miss_cell.jpg");
+        private string formattedStatus;
+
         private Map myMap;
         private Map opponentMap;
         private bool enabledOpponentGrid;
+
+        public GameViewModel(GameModel gameModel, Func<GameModel, FinishPage> createFinishPage, IClient client)
+        {
+            this.client = client;
+            this.gameModel = gameModel;
+            this.createFinishPage = createFinishPage;
+            fireTimeoutTimer = new PeriodicalTimer(TimeSpan.FromSeconds(1), UpdateYourChoiceFormattedStatusAsync, fireTimeout, RandomFireAsync, SetOpponentChoiceFormattedStatusAsync);
+            OpponentMap = Map.Empty;
+            MyMap = Map.Empty;
+            RestartGame = new Command(_ =>
+            {
+                pageCancellationTokenSource.Cancel();
+                var application = (App) Application.Current;
+                application.BeginGame();
+            });
+
+            Task.Run(async () => await GetStatusAsync());
+            SetOpponentChoiceFormattedStatusAsync();
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public Map OpponentMap
         {
@@ -64,29 +85,8 @@ namespace SeaWar.ViewModels
                 OnPropertyChanged(nameof(EnabledOpponentGrid));
             }
         }
-        
-        public GameViewModel(GameModel gameModel, Func<GameModel, FinishPage> createFinishPage, IClient client)
-        {
-            this.client = client;
-            this.gameModel = gameModel;
-            this.createFinishPage = createFinishPage;
-            fireTimeoutTimer = new PeriodicalTimer(TimeSpan.FromSeconds(1), UpdateYourChoiceFormattedStatusAsync, fireTimeout, RandomFireAsync, SetOpponentChoiceFormattedStatusAsync);
-            OpponentMap = Map.Empty;
-            MyMap = Map.Empty;
-            RestartGame = new Command(_ =>
-            {
-                pageCancellationTokenSource.Cancel();
-                var application = (App)Application.Current;
-                application.BeginGame();
-            });
-
-            Task.Run(async () => await GetStatusAsync());
-            SetOpponentChoiceFormattedStatusAsync();
-        }
 
         public Command RestartGame { get; }
-
-        public event PropertyChangedEventHandler PropertyChanged;
         public string MyName => gameModel.PlayerName;
         public string OpponentName => gameModel.AnotherPlayerName;
 
@@ -97,6 +97,87 @@ namespace SeaWar.ViewModels
             {
                 formattedStatus = value;
                 OnPropertyChanged(nameof(FormattedStatus));
+            }
+        }
+
+        public void InitGrid(Grid grid, bool useTapAction)
+        {
+            for (var i = 0; i < GameModel.MapHorizontalSize; i++)
+            {
+                for (var j = 0; j < GameModel.MapVerticalSize; j++)
+                {
+                    var image = new Image
+                    {
+                        Source = emptyImageSource
+                    };
+
+                    var tapGestureRecognizer = new TapGestureRecognizer();
+                    var cellPosition = new CellPosition(i, j);
+
+                    if (useTapAction)
+                    {
+                        tapGestureRecognizer.Tapped += async (sender, eventArgs) =>
+                        {
+                            // handle the tap
+                            var x = cellPosition.X;
+                            var y = cellPosition.Y;
+                            var tapImage = (Image) sender;
+
+                            //если кликаем не по пустой ячейке, то ничего не делаем
+                            if (!IsEqualsImageSources(tapImage.Source, emptyImageSource))
+                            {
+                                return;
+                            }
+
+                            await FireAsync(x, y);
+                        };
+                    }
+
+                    image.GestureRecognizers.Add(tapGestureRecognizer);
+                    grid.Children.Add(image, i, j);
+                }
+            }
+        }
+
+        public void UpdateGrid(Grid grid, Map map)
+        {
+            if (grid.Children.Count == 0 || grid.Children.Count < GameModel.MapHorizontalSize * GameModel.MapVerticalSize)
+            {
+                return;
+            }
+
+            var cells = map.Cells;
+            for (var i = 0; i < GameModel.MapHorizontalSize; i++)
+            {
+                for (var j = 0; j < GameModel.MapVerticalSize; j++)
+                {
+                    var cell = cells[i, j];
+                    var positionFlat = i * GameModel.MapVerticalSize + j;
+                    var child = grid.Children[positionFlat];
+                    var image = (Image) child;
+
+                    var imageSource = emptyImageSource;
+                    switch (cell.Status)
+                    {
+                        case CellStatus.Damaged:
+                            imageSource = danageImageSource;
+                            break;
+                        case CellStatus.Filled:
+                            imageSource = shipImageSource;
+                            break;
+                        case CellStatus.Missed:
+                            imageSource = missImageSource;
+                            break;
+                        default:
+                            imageSource = emptyImageSource;
+                            break;
+                    }
+
+                    if (!IsEqualsImageSources(image.Source, imageSource))
+                    {
+                        image.Source = imageSource;
+                    }
+                }
             }
         }
 
@@ -153,9 +234,7 @@ namespace SeaWar.ViewModels
                         gameModel.MyMap = MyMap;
                         gameModel.OpponentMap = OpponentMap;
                         gameModel.FinishReason = gameStatus.FinishReason.ToModel();
-                        Device.BeginInvokeOnMainThread(async () => {
-                            await Application.Current.MainPage.Navigation.PushModalAsync(createFinishPage(gameModel));
-                        });
+                        Device.BeginInvokeOnMainThread(async () => { await Application.Current.MainPage.Navigation.PushModalAsync(createFinishPage(gameModel)); });
                         return;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -186,90 +265,7 @@ namespace SeaWar.ViewModels
             return Task.CompletedTask;
         }
 
-        public void InitGrid(Grid grid, bool useTapAction)
-        {
-            for (int i = 0; i < GameModel.MapHorizontalSize; i++)
-            {
-                for (int j = 0; j < GameModel.MapVerticalSize; j++)
-                {
-                    var image = new Image()
-                    {
-                        Source = emptyImageSource
-                    };
-
-                    var tapGestureRecognizer = new TapGestureRecognizer();
-                    var cellPosition = new CellPosition(i, j);
-
-                    if (useTapAction)
-                    {
-                        tapGestureRecognizer.Tapped += async (sender, eventArgs) =>
-                        {
-                            // handle the tap
-                            var x = cellPosition.X;
-                            var y = cellPosition.Y;
-                            var tapImage = (Image) sender;
-                            
-                            //если кликаем не по пустой ячейке, то ничего не делаем
-                            if (!IsEqualsImageSources(tapImage.Source, emptyImageSource))
-                            {
-                                return;
-                            }
-                            
-                            await FireAsync(x, y);
-                        };
-                    }
-
-                    image.GestureRecognizers.Add(tapGestureRecognizer);
-                    grid.Children.Add(image, i, j);
-                }
-            }
-        }
-
-        public void UpdateGrid(Grid grid, Map map)
-        {
-            if (grid.Children.Count == 0 || grid.Children.Count < GameModel.MapHorizontalSize * GameModel.MapVerticalSize)
-            {
-                return;
-            }
-            
-            var cells = map.Cells;
-            for (int i = 0; i < GameModel.MapHorizontalSize; i++)
-            {
-                for (int j = 0; j < GameModel.MapVerticalSize; j++)
-                {
-                    var cell = cells[i, j];
-                    var positionFlat = i * GameModel.MapVerticalSize + j;
-                    var child = grid.Children[positionFlat];
-                    var image = (Image) child;
-
-                    var imageSource = emptyImageSource;
-                    switch (cell.Status)
-                    {
-                        case CellStatus.Damaged:
-                            imageSource = danageImageSource;
-                            break;
-                        case CellStatus.Filled:
-                            imageSource = shipImageSource;
-                            break;
-                        case CellStatus.Missed:
-                            imageSource = missImageSource;
-                            break;
-                        default:
-                            imageSource = emptyImageSource;
-                            break;
-                    }
-
-                    if (!IsEqualsImageSources(image.Source, imageSource))
-                    {
-                        image.Source = imageSource;
-                    }
-                }
-            }
-        }
-
-        private bool IsEqualsImageSources(ImageSource sourceA, ImageSource sourceB)
-        {
-            return (((FileImageSource) sourceA).File == ((FileImageSource) sourceB).File);
-        }
+        private bool IsEqualsImageSources(ImageSource sourceA, ImageSource sourceB) =>
+            ((FileImageSource) sourceA).File == ((FileImageSource) sourceB).File;
     }
 }
