@@ -14,5 +14,13 @@ namespace SeaWar.View
             InitializeComponent();
             BindingContext = createViewModel(model);
         }
+
+        private FinishViewModel Model => (FinishViewModel) BindingContext;
+
+        protected override bool OnBackButtonPressed()
+        {
+            Model.RestartGame.Execute(null);
+            return true;
+        }
     }
 }

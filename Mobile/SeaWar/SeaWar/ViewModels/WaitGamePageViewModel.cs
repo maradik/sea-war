@@ -14,7 +14,6 @@ namespace SeaWar.ViewModels
         private readonly ILogger logger;
         private readonly GameModel gameModel;
         private readonly Func<GameModel, GamePage> createGamePage;
-        private Task waitAnotherPlayerTask;
         private int millisecondsForRepeatServerRequest = 2 * 1000;
 
         public WaitGamePageViewModel(GameModel gameModel, Func<GameModel, GamePage> createGamePage, IClient client, ILogger logger)
@@ -23,7 +22,15 @@ namespace SeaWar.ViewModels
             this.logger = logger.WithContext(nameof(WaitGamePageViewModel));
             this.gameModel = gameModel;
             this.createGamePage = createGamePage;
+
+            RestartGame = new Command(_ =>
+            {
+                var application = (App)Application.Current;
+                application.BeginGame();
+            });
         }
+
+        public Command RestartGame { get; }
 
         private async Task WaitGameReadyAsync()
         {
@@ -57,7 +64,7 @@ namespace SeaWar.ViewModels
 
         public void StartWaitAnotherPlayer()
         {
-            waitAnotherPlayerTask = Task.Run(async () => await WaitGameReadyAsync());
+            Task.Run(async () => await WaitGameReadyAsync());
         }
     }
 }
