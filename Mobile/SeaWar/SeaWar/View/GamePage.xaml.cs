@@ -35,7 +35,7 @@ namespace SeaWar.View
                 var result = await DisplayAlert("Морской бой", "Закончить игру?", "Да", "Нет");
                 if (result)
                 {
-                    ((App) Application.Current).BeginGame();
+                    Model.RestartGame.Execute(null);
                 }
             });
             return true;

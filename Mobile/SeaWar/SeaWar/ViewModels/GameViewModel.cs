@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using SeaWar.Annotations;
 using SeaWar.Client;
@@ -28,6 +29,7 @@ namespace SeaWar.ViewModels
         private string formattedStatus;
         private readonly GameModel gameModel;
         private readonly Func<GameModel, FinishPage> createFinishPage;
+        private readonly CancellationTokenSource pageCancellationTokenSource = new CancellationTokenSource();
 
         private Map myMap;
         private Map opponentMap;
@@ -71,9 +73,18 @@ namespace SeaWar.ViewModels
             fireTimeoutTimer = new PeriodicalTimer(TimeSpan.FromSeconds(1), UpdateYourChoiceFormattedStatusAsync, fireTimeout, RandomFireAsync, SetOpponentChoiceFormattedStatusAsync);
             OpponentMap = Map.Empty;
             MyMap = Map.Empty;
+            RestartGame = new Command(_ =>
+            {
+                pageCancellationTokenSource.Cancel();
+                var application = (App)Application.Current;
+                application.BeginGame();
+            });
+
             Task.Run(async () => await GetStatusAsync());
             SetOpponentChoiceFormattedStatusAsync();
         }
+
+        public Command RestartGame { get; }
 
         public event PropertyChangedEventHandler PropertyChanged;
         public string MyName => gameModel.PlayerName;
@@ -98,7 +109,7 @@ namespace SeaWar.ViewModels
         private async Task FireAsync(int x, int y)
         {
             EnabledOpponentGrid = false;
-            await fireTimeoutTimer.Stop();
+            await fireTimeoutTimer.StopAsync();
 
             //TODO нужно "запретить" стрелять по клетке, по которой уже стрелял
             var parameters = new FireParameters
@@ -116,7 +127,7 @@ namespace SeaWar.ViewModels
 
         private async Task GetStatusAsync()
         {
-            while (true)
+            while (!pageCancellationTokenSource.Token.IsCancellationRequested)
             {
                 var parameters = new GetGameStatusParameters
                 {
@@ -133,7 +144,7 @@ namespace SeaWar.ViewModels
                 switch (gameStatus.GameStatus)
                 {
                     case GameStatus.YourChoice:
-                        await fireTimeoutTimer.Start();
+                        await fireTimeoutTimer.StartAsync(pageCancellationTokenSource.Token);
                         EnabledOpponentGrid = true;
                         return;
                     case GameStatus.PendingForFriendChoice:

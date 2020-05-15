@@ -30,15 +30,16 @@ namespace SeaWar.ViewModels
             this.timeout = timeout;
         }
 
-        public async Task Start()
+        public async Task StartAsync(CancellationToken cancellationToken)
         {
             await semaphoreSlim.WaitAsync();
             
             stopCancellationTokenSource = new CancellationTokenSource();
-            Task.Run(async () => await StartInternal(stopCancellationTokenSource.Token)).ContinueInParallel();
+            var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, stopCancellationTokenSource.Token);
+            Task.Run(async () => await StartInternal(cts.Token)).ContinueInParallel();
         }
 
-        public async Task Stop()
+        public async Task StopAsync()
         {
             stopCancellationTokenSource?.Cancel();
             await onStopCallback();

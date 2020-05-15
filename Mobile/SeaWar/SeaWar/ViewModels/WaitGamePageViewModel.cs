@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using SeaWar.Client;
 using SeaWar.Client.Contracts;
@@ -14,6 +15,7 @@ namespace SeaWar.ViewModels
         private readonly ILogger logger;
         private readonly GameModel gameModel;
         private readonly Func<GameModel, GamePage> createGamePage;
+        private readonly CancellationTokenSource pageCancellationTokenSource = new CancellationTokenSource();
         private int millisecondsForRepeatServerRequest = 2 * 1000;
 
         public WaitGamePageViewModel(GameModel gameModel, Func<GameModel, GamePage> createGamePage, IClient client, ILogger logger)
@@ -25,6 +27,7 @@ namespace SeaWar.ViewModels
 
             RestartGame = new Command(_ =>
             {
+                pageCancellationTokenSource.Cancel();
                 var application = (App)Application.Current;
                 application.BeginGame();
             });
@@ -34,7 +37,7 @@ namespace SeaWar.ViewModels
 
         private async Task WaitGameReadyAsync()
         {
-            while (true)
+            while (!pageCancellationTokenSource.Token.IsCancellationRequested)
             {
                 try
                 {
