@@ -13,8 +13,6 @@ namespace SeaWar.ViewModels
 {
     public class WelcomePageModelView : INotifyPropertyChanged, IUseValidation
     {
-        private readonly IClient client;
-
         private const int minUserNameLength = 5;
         private const string validateMessage = "Имя игрока должно быть не меньше 5 символов";
 
@@ -23,6 +21,7 @@ namespace SeaWar.ViewModels
         private string _playerName;
         private bool isValid;
         private string errorMessage;
+        private bool pageEnabled;
 
         public string PlayerName
         {
@@ -54,14 +53,24 @@ namespace SeaWar.ViewModels
             }
         }
 
+        public bool PageEnabled
+        {
+            get => pageEnabled;
+            set
+            {
+                pageEnabled = value;
+                OnPropertyChanged(nameof(PageEnabled));
+            }
+        }
+
         public Command StartGame { get; }
 
         public WelcomePageModelView(GameModel gameModel, Func<GameModel, WaitGamePage> createWaitGamePage, Func<GameModel, GamePage> createGamePage, IClient client)
         {
-            this.client = client;
-
+            PageEnabled = true;
             StartGame = new Command(async _ =>
             {
+                PageEnabled = false;
                 SavePlayerName();
 
                 var parameters = new CreateRoomParameters
