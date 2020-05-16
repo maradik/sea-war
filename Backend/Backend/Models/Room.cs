@@ -101,7 +101,7 @@ namespace Backend.Models
                     : GameStatus.PendingForFriendChoice;
             return new GetGameStatusResponseDto
             {
-                YourChoiceTimeout = gameStatus == GameStatus.YourChoice ? TimeSpan.FromSeconds(30) : TimeSpan.Zero,
+                YourChoiceTimeout = gameStatus == GameStatus.YourChoice ? TimeSpan.FromSeconds(15) : TimeSpan.Zero,
                 MyMap = GetMyPlayer(playerId).OwnMap.ToMapDto(),
                 GameStatus = gameStatus,
                 FinishReason = gameStatus == GameStatus.Finish
