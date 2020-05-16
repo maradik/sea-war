@@ -16,7 +16,8 @@ namespace SeaWar.ViewModels
     public class GameViewModel : INotifyPropertyChanged
     {
         private static readonly Random random = new Random();
-        private static readonly TimeSpan fireTimeout = TimeSpan.FromSeconds(15);
+        private static readonly TimeSpan defaultFireTimeout = TimeSpan.FromSeconds(15);
+        private static readonly TimeSpan periodOfStatusRefresh = TimeSpan.FromSeconds(1);
         private static readonly TimeSpan periodOfStatusPolling = TimeSpan.FromSeconds(1);
 
         private readonly IClient client;
@@ -40,7 +41,7 @@ namespace SeaWar.ViewModels
             this.client = client;
             this.gameModel = gameModel;
             this.createFinishPage = createFinishPage;
-            fireTimeoutTimer = new PeriodicalTimer(TimeSpan.FromSeconds(1), UpdateYourChoiceFormattedStatusAsync, fireTimeout, RandomFireAsync, SetOpponentChoiceFormattedStatusAsync);
+            fireTimeoutTimer = new PeriodicalTimer(UpdateYourChoiceFormattedStatusAsync, RandomFireAsync, SetOpponentChoiceFormattedStatusAsync);
             OpponentMap = Map.Empty;
             MyMap = Map.Empty;
             RestartGame = new Command(_ =>
@@ -225,7 +226,7 @@ namespace SeaWar.ViewModels
                 switch (gameStatus.GameStatus)
                 {
                     case GameStatus.YourChoice:
-                        await fireTimeoutTimer.StartAsync(pageCancellationTokenSource.Token);
+                        await fireTimeoutTimer.StartAsync(periodOfStatusRefresh, gameStatus.YourChoiceTimeout == default ? defaultFireTimeout : gameStatus.YourChoiceTimeout, pageCancellationTokenSource.Token);
                         EnabledOpponentGrid = true;
                         return;
                     case GameStatus.PendingForFriendChoice:
