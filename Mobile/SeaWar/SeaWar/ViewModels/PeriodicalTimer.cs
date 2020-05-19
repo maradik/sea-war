@@ -11,34 +11,31 @@ namespace SeaWar.ViewModels
         private readonly Func<Task> onTimeoutCallback;
         private readonly Func<Task> onStopCallback;
         private readonly Func<TimeSpan, Task> periodicalCallback;
-        private readonly TimeSpan period;
-        private readonly TimeSpan timeout;
         private volatile CancellationTokenSource stopCancellationTokenSource;
         private readonly SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
 
-        public PeriodicalTimer(TimeSpan period, Func<TimeSpan, Task> periodicalCallback, TimeSpan timeout, Func<Task> onTimeoutCallback, Func<Task> onStopCallback)
+        public PeriodicalTimer(Func<TimeSpan, Task> periodicalCallback, Func<Task> onTimeoutCallback, Func<Task> onStopCallback)
+        {
+            this.onTimeoutCallback = onTimeoutCallback;
+            this.onStopCallback = onStopCallback;
+            this.periodicalCallback = periodicalCallback;
+        }
+
+        public async Task StartAsync(TimeSpan period, TimeSpan timeout, CancellationToken cancellationToken)
         {
             if (timeout < period)
             {
                 throw new ArgumentException();
             }
 
-            this.onTimeoutCallback = onTimeoutCallback;
-            this.onStopCallback = onStopCallback;
-            this.periodicalCallback = periodicalCallback;
-            this.period = period;
-            this.timeout = timeout;
-        }
-
-        public async Task Start()
-        {
             await semaphoreSlim.WaitAsync();
             
             stopCancellationTokenSource = new CancellationTokenSource();
-            Task.Run(async () => await StartInternal(stopCancellationTokenSource.Token)).ContinueInParallel();
+            var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, stopCancellationTokenSource.Token);
+            Task.Run(async () => await StartInternal(period, timeout, cts.Token)).ContinueInParallel();
         }
 
-        public async Task Stop()
+        public async Task StopAsync()
         {
             stopCancellationTokenSource?.Cancel();
             await onStopCallback();
@@ -46,7 +43,7 @@ namespace SeaWar.ViewModels
             semaphoreSlim.Release();
         }
 
-        private async Task StartInternal(CancellationToken cancellation)
+        private async Task StartInternal(TimeSpan period, TimeSpan timeout, CancellationToken cancellation)
         {
             var timeoutCancellation = new CancellationTokenSource(timeout).Token;
             var stopwatch = new Stopwatch();

@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using SeaWar.DomainModels;
 using SeaWar.ViewModels;
 using Xamarin.Forms;
@@ -18,13 +14,19 @@ namespace SeaWar.View
             InitializeComponent();
             BindingContext = createViewModel(model);
         }
-        
-        private WaitGamePageViewModel Model => (BindingContext as WaitGamePageViewModel);
-        
+
+        private WaitGamePageViewModel Model => (WaitGamePageViewModel) BindingContext;
+
         protected override void OnAppearing()
         {
             base.OnAppearing();
             Model.StartWaitAnotherPlayer();
+        }
+
+        protected override bool OnBackButtonPressed()
+        {
+            Model.RestartGame.Execute(null);
+            return true;
         }
     }
 }

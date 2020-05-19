@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using SeaWar.Client;
 using SeaWar.Client.Contracts;
@@ -14,7 +15,7 @@ namespace SeaWar.ViewModels
         private readonly ILogger logger;
         private readonly GameModel gameModel;
         private readonly Func<GameModel, GamePage> createGamePage;
-        private Task waitAnotherPlayerTask;
+        private readonly CancellationTokenSource pageCancellationTokenSource = new CancellationTokenSource();
         private int millisecondsForRepeatServerRequest = 2 * 1000;
 
         public WaitGamePageViewModel(GameModel gameModel, Func<GameModel, GamePage> createGamePage, IClient client, ILogger logger)
@@ -23,11 +24,20 @@ namespace SeaWar.ViewModels
             this.logger = logger.WithContext(nameof(WaitGamePageViewModel));
             this.gameModel = gameModel;
             this.createGamePage = createGamePage;
+
+            RestartGame = new Command(_ =>
+            {
+                pageCancellationTokenSource.Cancel();
+                var application = (App)Application.Current;
+                application.BeginGame();
+            });
         }
+
+        public Command RestartGame { get; }
 
         private async Task WaitGameReadyAsync()
         {
-            while (true)
+            while (!pageCancellationTokenSource.Token.IsCancellationRequested)
             {
                 try
                 {
@@ -37,13 +47,18 @@ namespace SeaWar.ViewModels
                         PlayerId = gameModel.PlayerId
                     };
                     var getRoomStatusResponse = await client.GetRoomStatusAsync(parameters);
-                    if (getRoomStatusResponse.RoomStatus == CreateRoomStatus.Ready)
+                    switch (getRoomStatusResponse.RoomStatus)
                     {
-                        Device.BeginInvokeOnMainThread(async () => {
-                            await Application.Current.MainPage.Navigation.PushModalAsync(createGamePage(gameModel));
-                        });
-
-                        return;
+                        case CreateRoomStatus.NotReady:
+                            break;
+                        case CreateRoomStatus.Ready:
+                            gameModel.AnotherPlayerName = getRoomStatusResponse.AnotherPlayerName;
+                            Device.BeginInvokeOnMainThread(async () => {
+                                await Application.Current.MainPage.Navigation.PushModalAsync(createGamePage(gameModel));
+                            });
+                            return;
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(getRoomStatusResponse.RoomStatus), getRoomStatusResponse.RoomStatus, null);
                     }
 
                     await Task.Delay(millisecondsForRepeatServerRequest);
@@ -57,7 +72,7 @@ namespace SeaWar.ViewModels
 
         public void StartWaitAnotherPlayer()
         {
-            waitAnotherPlayerTask = Task.Run(async () => await WaitGameReadyAsync());
+            Task.Run(async () => await WaitGameReadyAsync());
         }
     }
 }

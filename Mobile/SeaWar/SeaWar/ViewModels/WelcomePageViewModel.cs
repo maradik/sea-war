@@ -13,8 +13,6 @@ namespace SeaWar.ViewModels
 {
     public class WelcomePageModelView : INotifyPropertyChanged, IUseValidation
     {
-        private readonly IClient client;
-
         private const int minUserNameLength = 5;
         private const string validateMessage = "Имя игрока должно быть не меньше 5 символов";
 
@@ -23,6 +21,7 @@ namespace SeaWar.ViewModels
         private string _playerName;
         private bool isValid;
         private string errorMessage;
+        private bool pageEnabled;
 
         public string PlayerName
         {
@@ -54,33 +53,46 @@ namespace SeaWar.ViewModels
             }
         }
 
+        public bool PageEnabled
+        {
+            get => pageEnabled;
+            set
+            {
+                pageEnabled = value;
+                OnPropertyChanged(nameof(PageEnabled));
+            }
+        }
+
         public Command StartGame { get; }
 
         public WelcomePageModelView(GameModel gameModel, Func<GameModel, WaitGamePage> createWaitGamePage, Func<GameModel, GamePage> createGamePage, IClient client)
         {
-            this.client = client;
-
+            PageEnabled = true;
             StartGame = new Command(async _ =>
             {
+                PageEnabled = false;
                 SavePlayerName();
 
                 var parameters = new CreateRoomParameters
                 {
-                    PlayerName = PlayerName
+                    PlayerName = PlayerName,
+                    PlayerId = gameModel.PlayerId
                 };
                 var createRoomResponse = await client.CreateRoomAsync(parameters);
                 gameModel.PlayerName = PlayerName;
-                gameModel.PlayerId = createRoomResponse.PlayerId;
                 gameModel.RoomId = createRoomResponse.RoomId;
                 gameModel.AnotherPlayerName = createRoomResponse.AnotherPlayerName;
 
-                if (createRoomResponse.RoomStatus == CreateRoomStatus.Ready)
+                switch (createRoomResponse.RoomStatus)
                 {
-                    await Application.Current.MainPage.Navigation.PushModalAsync(createGamePage(gameModel));
-                }
-                else
-                {
-                    await Application.Current.MainPage.Navigation.PushModalAsync(createWaitGamePage(gameModel));
+                    case CreateRoomStatus.NotReady:
+                        await Application.Current.MainPage.Navigation.PushModalAsync(createWaitGamePage(gameModel));                        
+                        break;
+                    case CreateRoomStatus.Ready:
+                        await Application.Current.MainPage.Navigation.PushModalAsync(createGamePage(gameModel));
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(createRoomResponse.RoomStatus), createRoomResponse.RoomStatus, null);
                 }
             });
         }

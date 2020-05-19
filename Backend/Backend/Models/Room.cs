@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Security.Policy;
 using Backend.Controllers.Dto;
 using Backend.Managers;
 
@@ -6,25 +8,35 @@ namespace Backend.Models
 {
     public class Room
     {
+        private static readonly TimeSpan idleTimeout = TimeSpan.FromSeconds(30);
+        private static readonly TimeSpan fireTimeout = TimeSpan.FromSeconds(15);
+        private static readonly HashSet<RoomStatus> activeRoomStatuses = new HashSet<RoomStatus>{RoomStatus.EmptyRoom, RoomStatus.NotReady, RoomStatus.Ready};
         private readonly PlayerBuilder playerBuilder;
 
-        public Room(PlayerBuilder playerBuilder) =>
+        public Room(PlayerBuilder playerBuilder)
+        {
             this.playerBuilder = playerBuilder;
+            LastActivityTicks = DateTime.Now.Ticks;
+        }
 
+        public bool HasActiveStatus => activeRoomStatuses.Contains(Status);
         public Guid Id { get; set; }
         public Player Player1 { get; set; }
         public Player Player2 { get; set; }
-        public bool GameFinished { get; set; }
         public RoomStatus Status { get; set; }
-        public long LastMoveTicks { get; set; }
+        public long LastActivityTicks { get; set; }
         public Guid CurrentPlayerId { get; set; }
 
         public CreateRoomResponseDto Enter(CreateRoomRequestDto requestDto)
         {
-            if (Status == RoomStatus.Ready)
+            UpdateStatusIfNeeded();
+
+            if (Status != RoomStatus.EmptyRoom && Status != RoomStatus.NotReady)
                 throw new InvalidOperationException("Room already filled");
 
-            var player = playerBuilder.Build(requestDto.PlayerName);
+            LastActivityTicks = DateTime.Now.Ticks;
+
+            var player = playerBuilder.Build(requestDto.PlayerId, requestDto.PlayerName);
 
             if (Player1 == null)
             {
@@ -42,7 +54,6 @@ namespace Backend.Models
             Player2 = player;
             Status = RoomStatus.Ready;
             CurrentPlayerId = Player1.Id;
-            LastMoveTicks = DateTime.Now.Ticks;
 
             return new CreateRoomResponseDto
             {
@@ -55,7 +66,12 @@ namespace Backend.Models
 
         public FireResponseDto Fire(FireRequestDto dto, Guid playerId)
         {
-            LastMoveTicks = DateTime.Now.Ticks;
+            UpdateStatusIfNeeded();
+
+            if (Status != RoomStatus.Ready)
+                throw new InvalidOperationException("Room is not ready");            
+
+            LastActivityTicks = DateTime.Now.Ticks;
 
             var enemyPlayer = GetEnemyPlayer(playerId);
             var fireResult = enemyPlayer.ProcessEnemyMove(dto.X, dto.Y);
@@ -63,28 +79,33 @@ namespace Backend.Models
                 ? playerId
                 : enemyPlayer.Id;
 
-            GameFinished = !enemyPlayer.AnyShipsAlive();
+            Status = !enemyPlayer.AnyShipsAlive() ? RoomStatus.Finished : Status;
             return new FireResponseDto
             {
                 EnemyMap = enemyPlayer.OwnMap.ToMapForEnemyDto()
             };
         }
 
-        public GetRoomStatusResponseDto GetStatus(Guid playerId) =>
-            new GetRoomStatusResponseDto
+        public GetRoomStatusResponseDto GetStatus(Guid playerId)
+        {
+            UpdateStatusIfNeeded();
+            LastActivityTicks = DateTime.Now.Ticks;
+
+            return new GetRoomStatusResponseDto
             {
                 PlayerId = playerId,
                 RoomId = Id,
                 RoomStatus = Status,
                 AnotherPlayerName = GetEnemyPlayer(playerId)?.Name
             };
+        }
 
         public GetGameStatusResponseDto GetGameStatus(Guid playerId)
         {
-            var currentTicks = DateTime.Now.Ticks;
-            if (TimeSpan.FromTicks(currentTicks - LastMoveTicks) > TimeSpan.FromSeconds(60))
+            UpdateStatusIfNeeded();
+
+            if (Status == RoomStatus.Orphaned)
             {
-                GameFinished = true;
                 return new GetGameStatusResponseDto
                 {
                     FinishReason = FinishReason.ConnectionLost,
@@ -94,14 +115,14 @@ namespace Backend.Models
                 };
             }
 
-            var gameStatus = GameFinished
+            var gameStatus = Status == RoomStatus.Finished
                 ? GameStatus.Finish
                 : CurrentPlayerId == playerId
                     ? GameStatus.YourChoice
                     : GameStatus.PendingForFriendChoice;
             return new GetGameStatusResponseDto
             {
-                YourChoiceTimeout = gameStatus == GameStatus.YourChoice ? TimeSpan.FromSeconds(30) : TimeSpan.Zero,
+                YourChoiceTimeout = gameStatus == GameStatus.YourChoice ? fireTimeout : TimeSpan.Zero,
                 MyMap = GetMyPlayer(playerId).OwnMap.ToMapDto(),
                 GameStatus = gameStatus,
                 FinishReason = gameStatus == GameStatus.Finish
@@ -117,5 +138,14 @@ namespace Backend.Models
 
         private Player GetMyPlayer(Guid playerId) =>
             Player1.Id == playerId ? Player1 : Player2;
+
+        public void UpdateStatusIfNeeded()
+        {
+            var currentTicks = DateTime.Now.Ticks;
+            if (HasActiveStatus && TimeSpan.FromTicks(currentTicks - LastActivityTicks) > idleTimeout)
+            {
+                Status = RoomStatus.Orphaned;
+            }
+        }
     }
 }

@@ -16,7 +16,6 @@ namespace SeaWar.Client
             return Task.FromResult(new RoomResponse()
             {
                 RoomStatus = CreateRoomStatus.NotReady,
-                PlayerId = Guid.NewGuid(),
                 RoomId = Guid.NewGuid(),
                 AnotherPlayerName = nameof(RoomResponse.AnotherPlayerName)
             });
@@ -32,7 +31,6 @@ namespace SeaWar.Client
             return Task.FromResult(new RoomResponse()
             {
                 RoomStatus = status,
-                PlayerId = parameters.PlayerId,
                 RoomId = parameters.RoomId,
                 AnotherPlayerName = nameof(RoomResponse.AnotherPlayerName)
             });

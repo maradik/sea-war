@@ -10,10 +10,10 @@ namespace Backend.Managers
         public PlayerBuilder(MapBuilder mapBuilder) =>
             this.mapBuilder = mapBuilder;
 
-        public Player Build(string playerName) =>
+        public Player Build(Guid? id, string playerName) =>
             new Player
             {
-                Id = Guid.NewGuid(),
+                Id = id ?? Guid.NewGuid(),
                 Name = playerName,
                 OwnMap = mapBuilder.Build()
             };

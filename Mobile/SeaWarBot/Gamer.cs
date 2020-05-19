@@ -12,6 +12,8 @@ namespace SeaWarBot
         private readonly ILogger logger = new Logger(nameof(Gamer));
         private readonly Client client = new Client(Settings.ServerUri, Settings.Timeout, new DummyLogger());
         
+        private readonly Guid playerId = Guid.NewGuid();
+
         public async Task PlayAsync()
         {
             var room = await CreateRoom();
@@ -19,7 +21,7 @@ namespace SeaWarBot
             
             while (true)
             {
-                var getGameStatusParameters = new GetGameStatusParameters {PlayerId = room.PlayerId, RoomId = room.RoomId};
+                var getGameStatusParameters = new GetGameStatusParameters {PlayerId = playerId, RoomId = room.RoomId};
                 var gameStatus = await client.GetGameStatusAsync(getGameStatusParameters);
 
                 switch (gameStatus.GameStatus)
@@ -46,7 +48,7 @@ namespace SeaWarBot
                 var (x, y) = (random.Next(10), random.Next(10));
                 if (opponentMap.Cells[x, y].Status == EnemyCellStatus.Unknown)
                 {
-                    var fireParameters = new FireParameters {RoomId = room.RoomId, PlayerId = room.PlayerId, FieredCell = new CellPosition(x, y)};
+                    var fireParameters = new FireParameters {RoomId = room.RoomId, PlayerId = playerId, FieredCell = new CellPosition(x, y)};
                     var fireResult = await client.FireAsync(fireParameters);
                     logger.Info($"Выстрел по координате {(x,y)} с результатом {fireResult.EnemyMap.Cells[x,y].Status}");
                     return;
@@ -56,13 +58,13 @@ namespace SeaWarBot
 
         private async Task<RoomResponse> CreateRoom()
         {
-            var createRoomParameters = new CreateRoomParameters {PlayerName = Guid.NewGuid().ToString()};
+            var createRoomParameters = new CreateRoomParameters {PlayerName = Guid.NewGuid().ToString(), PlayerId = playerId};
             var room = await client.CreateRoomAsync(createRoomParameters);
             logger.Info($"Комната создана RoomId={room.RoomId}, Status={room.RoomStatus}, PlayerName={createRoomParameters.PlayerName}");
 
             while (room.RoomStatus != CreateRoomStatus.Ready)
             {
-                var getRoomStatusParameters = new GetRoomStatusParameters {PlayerId = room.PlayerId, RoomId = room.RoomId};
+                var getRoomStatusParameters = new GetRoomStatusParameters {PlayerId = playerId, RoomId = room.RoomId};
                 room = await client.GetRoomStatusAsync(getRoomStatusParameters);
                 await Task.Delay(1000);
             }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Threading.Tasks;
 using Autofac;
 using SeaWar.DomainModels;
 using SeaWar.ViewModels;
@@ -34,14 +35,9 @@ namespace SeaWar.View
                 var result = await DisplayAlert("Морской бой", "Закончить игру?", "Да", "Нет");
                 if (result)
                 {
-                    base.OnBackButtonPressed();
-                    var gameModel = new GameModel();
-                    var createWelcomePage = ((App) Application.Current).Container.Resolve<Func<GameModel, WelcomePage>>();
-                    var welcomePage = createWelcomePage(gameModel);
-                    await Application.Current.MainPage.Navigation.PushAsync(welcomePage);
+                    Model.RestartGame.Execute(null);
                 }
             });
-
             return true;
         }
 
