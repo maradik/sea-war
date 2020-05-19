@@ -75,21 +75,24 @@ namespace SeaWar.ViewModels
 
                 var parameters = new CreateRoomParameters
                 {
-                    PlayerName = PlayerName
+                    PlayerName = PlayerName,
+                    PlayerId = gameModel.PlayerId
                 };
                 var createRoomResponse = await client.CreateRoomAsync(parameters);
                 gameModel.PlayerName = PlayerName;
-                gameModel.PlayerId = createRoomResponse.PlayerId;
                 gameModel.RoomId = createRoomResponse.RoomId;
                 gameModel.AnotherPlayerName = createRoomResponse.AnotherPlayerName;
 
-                if (createRoomResponse.RoomStatus == CreateRoomStatus.Ready)
+                switch (createRoomResponse.RoomStatus)
                 {
-                    await Application.Current.MainPage.Navigation.PushModalAsync(createGamePage(gameModel));
-                }
-                else
-                {
-                    await Application.Current.MainPage.Navigation.PushModalAsync(createWaitGamePage(gameModel));
+                    case CreateRoomStatus.NotReady:
+                        await Application.Current.MainPage.Navigation.PushModalAsync(createWaitGamePage(gameModel));                        
+                        break;
+                    case CreateRoomStatus.Ready:
+                        await Application.Current.MainPage.Navigation.PushModalAsync(createGamePage(gameModel));
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(createRoomResponse.RoomStatus), createRoomResponse.RoomStatus, null);
                 }
             });
         }

@@ -47,14 +47,18 @@ namespace SeaWar.ViewModels
                         PlayerId = gameModel.PlayerId
                     };
                     var getRoomStatusResponse = await client.GetRoomStatusAsync(parameters);
-                    if (getRoomStatusResponse.RoomStatus == CreateRoomStatus.Ready)
+                    switch (getRoomStatusResponse.RoomStatus)
                     {
-                        gameModel.AnotherPlayerName = getRoomStatusResponse.AnotherPlayerName;
-                        Device.BeginInvokeOnMainThread(async () => {
-                            await Application.Current.MainPage.Navigation.PushModalAsync(createGamePage(gameModel));
-                        });
-
-                        return;
+                        case CreateRoomStatus.NotReady:
+                            break;
+                        case CreateRoomStatus.Ready:
+                            gameModel.AnotherPlayerName = getRoomStatusResponse.AnotherPlayerName;
+                            Device.BeginInvokeOnMainThread(async () => {
+                                await Application.Current.MainPage.Navigation.PushModalAsync(createGamePage(gameModel));
+                            });
+                            return;
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(getRoomStatusResponse.RoomStatus), getRoomStatusResponse.RoomStatus, null);
                     }
 
                     await Task.Delay(millisecondsForRepeatServerRequest);
