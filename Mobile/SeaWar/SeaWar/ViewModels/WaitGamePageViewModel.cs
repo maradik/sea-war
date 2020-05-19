@@ -49,6 +49,7 @@ namespace SeaWar.ViewModels
                     var getRoomStatusResponse = await client.GetRoomStatusAsync(parameters);
                     if (getRoomStatusResponse.RoomStatus == CreateRoomStatus.Ready)
                     {
+                        gameModel.AnotherPlayerName = getRoomStatusResponse.AnotherPlayerName;
                         Device.BeginInvokeOnMainThread(async () => {
                             await Application.Current.MainPage.Navigation.PushModalAsync(createGamePage(gameModel));
                         });
