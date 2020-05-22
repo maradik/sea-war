@@ -18,10 +18,10 @@
             <ColumnDefinition Width="*"></ColumnDefinition>
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
-        
-        <Label Text="{Binding MyName}" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3" HorizontalOptions="Center" VerticalOptions="Center" />
-        <Label Text="{Binding OpponentName}" Grid.Column="4" Grid.Row="0" Grid.ColumnSpan="3" HorizontalOptions="Center" VerticalOptions="Center" />
-        <Label Text="{Binding FormattedStatus}" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="7" HorizontalOptions="Center" VerticalOptions="Center" />
+
+        <Label Text="{Binding FormattedStatus}" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="7" HorizontalOptions="Center" VerticalOptions="Center" FontSize="22" TextColor="{Binding StatusColor}" FontAttributes="Bold" />
+        <Label Text="Моя диспозиция" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" HorizontalOptions="Center" VerticalOptions="Center" TextColor="DarkGreen" FontSize="18" />
+        <Label Text="{Binding OpponentName}" Grid.Column="4" Grid.Row="1" Grid.ColumnSpan="3" HorizontalOptions="Center" VerticalOptions="Center" TextColor="Crimson" FontSize="18" LineBreakMode="TailTruncation" />
 
         <StackLayout Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="3">
             <Grid x:Name="PlayerGrid" HorizontalOptions="Center">

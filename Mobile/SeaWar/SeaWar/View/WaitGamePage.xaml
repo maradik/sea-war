@@ -7,7 +7,7 @@
         <StackLayout>
             <Label Text="Ждем подключения соперника"
                    VerticalOptions="Center"
-                   HorizontalOptions="CenterAndExpand" FontSize="22" Margin="30"/>
+                   HorizontalOptions="CenterAndExpand" FontSize="22" Margin="30" TextColor="Sienna"/>
             <ActivityIndicator Color="#ffa822" HorizontalOptions="Center" IsRunning="True" Margin="15"/>
         </StackLayout>
     </ContentPage.Content>

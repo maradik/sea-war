@@ -36,6 +36,7 @@ namespace SeaWar.ViewModels
         private Map myMap;
         private Map opponentMap;
         private bool enabledOpponentGrid;
+        private Color statusColor;
 
         public GameViewModel(GameModel gameModel, Func<GameModel, FinishPage> createFinishPage, IClient client)
         {
@@ -101,6 +102,17 @@ namespace SeaWar.ViewModels
                 OnPropertyChanged(nameof(FormattedStatus));
             }
         }
+
+        public Color StatusColor
+        {
+            get => statusColor;
+            set
+            {
+                statusColor = value;
+                OnPropertyChanged(nameof(StatusColor));
+            }
+        }
+
 
         public void InitGrid(Grid grid, bool useTapAction)
         {
@@ -243,7 +255,8 @@ namespace SeaWar.ViewModels
 
         private Task UpdateYourChoiceFormattedStatusAsync(TimeSpan remain)
         {
-            FormattedStatus = $"Ходи {remain.TotalSeconds.ToString("0")}";
+            FormattedStatus = $"Ходи! Осталось {remain.TotalSeconds.ToString("0")} сек.";
+            StatusColor = Color.Green;
             return Task.CompletedTask;
         }
 
@@ -263,7 +276,8 @@ namespace SeaWar.ViewModels
 
         private Task SetOpponentChoiceFormattedStatusAsync()
         {
-            FormattedStatus = "Ход соперника";
+            FormattedStatus = "Ход соперника...";
+            StatusColor = Color.Crimson;
             return Task.CompletedTask;
         }
 

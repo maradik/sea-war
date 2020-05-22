@@ -8,7 +8,7 @@
     <ContentPage.Content>
         <StackLayout Margin="20" BackgroundColor="#dee0e6">
             <StackLayout HorizontalOptions="Center">
-            <Label Text="Имя игрока" FontSize="22" HorizontalOptions="Center"/>
+            <Label Text="Имя игрока" FontSize="22" HorizontalOptions="Center" TextColor="Sienna"/>
             <Entry Text="{Binding PlayerName}" FontSize="22">
                 <Entry.Behaviors>
                     <validation:EmptyValidationBehavior />
