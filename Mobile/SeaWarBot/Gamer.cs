@@ -13,6 +13,7 @@ namespace SeaWarBot
         private readonly Client client = new Client(Settings.ServerUri, Settings.Timeout, new DummyLogger());
         
         private readonly Guid playerId = Guid.NewGuid();
+        private string playerName = "Федот-стрелец";
 
         public async Task PlayAsync()
         {
@@ -58,7 +59,7 @@ namespace SeaWarBot
 
         private async Task<RoomResponse> CreateRoom()
         {
-            var createRoomParameters = new CreateRoomParameters {PlayerName = Guid.NewGuid().ToString(), PlayerId = playerId};
+            var createRoomParameters = new CreateRoomParameters {PlayerName = playerName, PlayerId = playerId};
             var room = await client.CreateRoomAsync(createRoomParameters);
             logger.Info($"Комната создана RoomId={room.RoomId}, Status={room.RoomStatus}, PlayerName={createRoomParameters.PlayerName}");
 
