@@ -2,6 +2,7 @@
 using SeaWar.Client.Contracts;
 using SeaWar.ViewModels;
 using Cell = SeaWar.ViewModels.Cell;
+using CellPosition = SeaWar.ViewModels.CellPosition;
 using FinishReason = SeaWar.DomainModels.FinishReason;
 using Map = SeaWar.ViewModels.Map;
 
@@ -9,6 +10,9 @@ namespace SeaWar.Extensions
 {
     public static class ConverterExtensions
     {
+        public static Client.Contracts.CellPosition ToDto(this CellPosition model) =>
+            new Client.Contracts.CellPosition(model.X, model.Y);
+
         public static Map ToModel(this Client.Contracts.Map dto)
         {
             var xLength = dto.Cells.GetLength(0);

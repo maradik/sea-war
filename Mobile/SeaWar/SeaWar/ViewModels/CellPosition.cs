@@ -1,4 +1,4 @@
-﻿namespace SeaWar.Client.Contracts
+﻿namespace SeaWar.ViewModels
 {
     public class CellPosition
     {

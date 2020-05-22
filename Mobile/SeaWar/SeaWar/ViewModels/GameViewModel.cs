@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -119,9 +120,6 @@ namespace SeaWar.ViewModels
                     {
                         tapGestureRecognizer.Tapped += async (sender, eventArgs) =>
                         {
-                            // handle the tap
-                            var x = cellPosition.X;
-                            var y = cellPosition.Y;
                             var tapImage = (Image) sender;
 
                             //если кликаем не по пустой ячейке, то ничего не делаем
@@ -130,7 +128,7 @@ namespace SeaWar.ViewModels
                                 return;
                             }
 
-                            await FireAsync(x, y);
+                            await FireAsync(cellPosition);
                         };
                     }
 
@@ -188,22 +186,20 @@ namespace SeaWar.ViewModels
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        private async Task FireAsync(int x, int y)
+        private async Task FireAsync(CellPosition cellPosition)
         {
             EnabledOpponentGrid = false;
             await fireTimeoutTimer.StopAsync();
 
-            //TODO нужно "запретить" стрелять по клетке, по которой уже стрелял
             var parameters = new FireParameters
             {
                 RoomId = gameModel.RoomId,
                 PlayerId = gameModel.PlayerId,
-                FieredCell = new CellPosition(x, y)
+                FieredCell = cellPosition.ToDto()
             };
             var fireResult = await client.FireAsync(parameters);
             OpponentMap = fireResult.EnemyMap.ToModel();
 
-            //ToDo redraw
             await GetStatusAsync();
         }
 
@@ -253,11 +249,16 @@ namespace SeaWar.ViewModels
 
         private async Task RandomFireAsync()
         {
-            //TODO нужно "запретить" стрелять по клетке, по которой уже стрелял
-            var x = random.Next(OpponentMap.Cells.GetLength(0));
-            var y = random.Next(OpponentMap.Cells.GetLength(1));
+            var emptyCellPositions = OpponentMap.GetCellPositionsWithStatus(CellStatus.Empty);
+            if (!emptyCellPositions.Any())
+            {
+                // если пустых клеток нет, то игра должна была уже закончиться к этому моменту, пробуем еще раз получить статус игры с бэкенда
+                await GetStatusAsync();
+                return;
+            }
 
-            await FireAsync(x, y);
+            var cellPositionIndex = random.Next(emptyCellPositions.Length);
+            await FireAsync(emptyCellPositions[cellPositionIndex]);
         }
 
         private Task SetOpponentChoiceFormattedStatusAsync()
