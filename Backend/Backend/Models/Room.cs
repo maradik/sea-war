@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Policy;
-using Backend.Controllers.Dto;
+using Backend.Controllers.v1.Dto;
 using Backend.Managers;
 
 namespace Backend.Models
@@ -12,68 +12,66 @@ namespace Backend.Models
         private static readonly TimeSpan fireTimeout = TimeSpan.FromSeconds(15);
         private static readonly HashSet<RoomStatus> activeRoomStatuses = new HashSet<RoomStatus>{RoomStatus.EmptyRoom, RoomStatus.NotReady, RoomStatus.Ready};
         private readonly PlayerBuilder playerBuilder;
+        private RoomStatus status;
 
         public Room(PlayerBuilder playerBuilder)
         {
             this.playerBuilder = playerBuilder;
-            LastActivityTicks = DateTime.Now.Ticks;
+            Touch();
         }
 
         public bool HasActiveStatus => activeRoomStatuses.Contains(Status);
         public Guid Id { get; set; }
         public Player Player1 { get; set; }
         public Player Player2 { get; set; }
-        public RoomStatus Status { get; set; }
+        public RoomStatus Status
+        {
+            get
+            {
+                var currentTicks = DateTime.Now.Ticks;
+                if (HasActiveStatus && TimeSpan.FromTicks(currentTicks - LastActivityTicks) > idleTimeout)
+                {
+                    status = RoomStatus.Orphaned;
+                }
+
+                return status;
+            }
+            set => status = value;
+        }
+
         public long LastActivityTicks { get; set; }
         public Guid CurrentPlayerId { get; set; }
 
-        public CreateRoomResponseDto Enter(CreateRoomRequestDto requestDto)
+        public Player Enter(Guid playerId, string playerName)
         {
-            UpdateStatusIfNeeded();
-
             if (Status != RoomStatus.EmptyRoom && Status != RoomStatus.NotReady)
                 throw new InvalidOperationException("Room already filled");
 
-            LastActivityTicks = DateTime.Now.Ticks;
+            Touch();
 
-            var player = playerBuilder.Build(requestDto.PlayerId, requestDto.PlayerName);
+            var player = playerBuilder.Build(playerId, playerName);
 
             if (Player1 == null)
             {
                 Player1 = player;
                 Status = RoomStatus.NotReady;
-                return new CreateRoomResponseDto
-                {
-                    PlayerId = player.Id,
-                    RoomId = Id,
-                    RoomStatus = RoomStatus.NotReady,
-                    AnotherPlayerName = null
-                };
+                return Player1;
             }
 
             Player2 = player;
             Status = RoomStatus.Ready;
             CurrentPlayerId = Player1.Id;
-
-            return new CreateRoomResponseDto
-            {
-                PlayerId = player.Id,
-                RoomId = Id,
-                RoomStatus = RoomStatus.Ready,
-                AnotherPlayerName = Player1.Name
-            };
+            return Player2;
         }
 
         public FireResponseDto Fire(FireRequestDto dto, Guid playerId)
         {
-            UpdateStatusIfNeeded();
-
             if (Status != RoomStatus.Ready)
-                throw new InvalidOperationException("Room is not ready");            
+                throw new InvalidOperationException("Room is not ready");
 
-            LastActivityTicks = DateTime.Now.Ticks;
+            Touch();
 
-            var enemyPlayer = GetEnemyPlayer(playerId);
+            var enemyPlayer = GetEnemyPlayerFor(playerId);
             var fireResult = enemyPlayer.ProcessEnemyMove(dto.X, dto.Y);
             CurrentPlayerId = fireResult != FireResult.Missed
                 ? playerId
@@ -86,24 +84,12 @@ namespace Backend.Models
             };
         }
 
-        public GetRoomStatusResponseDto GetStatus(Guid playerId)
-        {
-            UpdateStatusIfNeeded();
+        [Obsolete("Временны костыль")]
+        public void Touch() =>
             LastActivityTicks = DateTime.Now.Ticks;
-
-            return new GetRoomStatusResponseDto
-            {
-                PlayerId = playerId,
-                RoomId = Id,
-                RoomStatus = Status,
-                AnotherPlayerName = GetEnemyPlayer(playerId)?.Name
-            };
-        }
 
         public GetGameStatusResponseDto GetGameStatus(Guid playerId)
         {
-            UpdateStatusIfNeeded();
-
             if (Status == RoomStatus.Orphaned)
             {
                 return new GetGameStatusResponseDto
@@ -133,19 +119,10 @@ namespace Backend.Models
             };
         }
 
-        private Player GetEnemyPlayer(Guid playerId) =>
+        public Player GetEnemyPlayerFor(Guid playerId) =>
             Player1.Id == playerId ? Player2 : Player1;
 
         private Player GetMyPlayer(Guid playerId) =>
             Player1.Id == playerId ? Player1 : Player2;
-
-        public void UpdateStatusIfNeeded()
-        {
-            var currentTicks = DateTime.Now.Ticks;
-            if (HasActiveStatus && TimeSpan.FromTicks(currentTicks - LastActivityTicks) > idleTimeout)
-            {
-                Status = RoomStatus.Orphaned;
-            }
-        }
     }
 }

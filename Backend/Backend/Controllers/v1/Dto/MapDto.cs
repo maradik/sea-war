@@ -1,6 +1,6 @@
 ﻿using Backend.Models;
 
-namespace Backend.Controllers.Dto
+namespace Backend.Controllers.v1.Dto
 {
     public class MapDto
     {

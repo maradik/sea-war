@@ -1,5 +1,5 @@
 using System;
-using Backend.Controllers.Dto;
+using Backend.Controllers.v1.Dto;
 using Backend.Models;
 
 namespace Backend.Managers
@@ -11,7 +11,7 @@ namespace Backend.Managers
         public RoomCreator(PlayerBuilder playerBuilder) =>
             this.playerBuilder = playerBuilder;
 
-        public Room CreateRoom(CreateRoomRequestDto dto) =>
+        public Room CreateRoom() =>
             new Room(playerBuilder)
             {
                 Id = Guid.NewGuid(),

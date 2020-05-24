@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using Backend.Controllers.Dto;
+using Backend.Controllers.v1.Dto;
 
 namespace Backend.Models
 {

@@ -1,7 +1,8 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using Backend.Controllers.Dto;
+using Backend.Controllers.v1.Dto;
 using Backend.Models;
 
 namespace Backend.Managers
@@ -9,50 +10,65 @@ namespace Backend.Managers
     public class RoomManager
     {
         private readonly RoomCreator roomCreator;
-        private readonly Dictionary<Guid, Room> rooms = new Dictionary<Guid, Room>();
+        private readonly ConcurrentDictionary<Guid, Room> rooms = new ConcurrentDictionary<Guid, Room>();
 
         public RoomManager(RoomCreator roomCreator) =>
             this.roomCreator = roomCreator;
 
-        public Room GetRoom(Guid roomId)
+        public GetRoomStatusResult GetStatus(Guid roomId, Guid playerId)
         {
             var room = rooms[roomId];
-            lock (room)
+            room.Touch();
+            return new GetRoomStatusResult
             {
-                return room;
-            }
+                PlayerId = playerId,
+                RoomId = room.Id,
+                RoomStatus = room.Status,
+                AnotherPlayerName = room.GetEnemyPlayerFor(playerId)?.Name
+            };
         }
 
-        public CreateRoomResponseDto CreateOrEnterRoom(CreateRoomRequestDto requestDto)
+        public FireResponseDto Fire(FireRequestDto dto, Guid roomId, Guid playerId) =>
+            rooms[roomId].Fire(dto, playerId);
+
+        public GetGameStatusResponseDto GetGameStatus(Guid roomId, Guid playerId) =>
+            rooms[roomId].GetGameStatus(playerId);
+
+        [Obsolete]
+        public EnterOrCreateRoomResult EnterOrCreateRoom(Guid playerId, string playerName)
         {
             lock (rooms)
             {
-                UpdateRoomStatuses(requestDto);
+                UpdateRoomStatuses(playerId);
+                var room = GetOrCreateRoom();
+                var player = room.Enter(playerId, playerName);
 
-                var availableRoom = rooms.FirstOrDefault(x => x.Value.Status == RoomStatus.NotReady).Value;
-                if (availableRoom != null)
+                return new EnterOrCreateRoomResult
                 {
-                    return availableRoom.Enter(requestDto);
-                }
-
-                var room = roomCreator.CreateRoom(requestDto);
-                rooms[room.Id] = room;
-                return room.Enter(requestDto);
+                    PlayerId = player.Id,
+                    RoomId = room.Id,
+                    RoomStatus = room.Status,
+                    AnotherPlayerName = room.GetEnemyPlayerFor(player.Id)?.Name
+                };
             }
         }
 
-        private void UpdateRoomStatuses(CreateRoomRequestDto requestDto)
+        private Room GetOrCreateRoom()
+        {
+            var room = rooms.FirstOrDefault(x => x.Value.Status == RoomStatus.NotReady).Value ?? roomCreator.CreateRoom();
+            rooms[room.Id] = room;
+            return room;
+        }
+
+        private void UpdateRoomStatuses(Guid playerId)
         {
             foreach (var room in rooms.Select(x => x.Value))
             {
-                room.UpdateStatusIfNeeded();
-
-                if (room.HasActiveStatus &&
-                    (room.Player1 != null && room.Player1.Id == requestDto.PlayerId ||
-                    room.Player2 != null && room.Player2.Id == requestDto.PlayerId))
+                if (room.HasActiveStatus && (room.Player1?.Id == playerId || room.Player2?.Id == playerId))
                 {
                     room.Status = RoomStatus.Orphaned;
                 }
+
                 //TODO удалять старые закрытые комнаты, чтобы не случился OOM
             }
         }
