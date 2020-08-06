@@ -1,6 +1,6 @@
 ﻿using System;
-using Backend.Controllers.v2.Dto;
 using Backend.Managers;
+using Integration.Dtos.v2;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers.v2
