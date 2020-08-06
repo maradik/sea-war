@@ -66,7 +66,7 @@ namespace Backend.Managers
 
         public Room[] GetOpenedRooms()
         {
-            return rooms.Values.Where(x => x.IsOpened).OrderByDescending(x => x.LastActivityTicks).ToArray();
+            return rooms.Values.Where(x => x.IsOpened).OrderByDescending(x => x.LastActivityTicks).Take(20).ToArray();
         }
 
         public Room GetRoom(Guid roomId)
