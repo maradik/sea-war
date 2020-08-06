@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Backend.Controllers.v1.Dto;
 using Backend.Managers;
 
 namespace Backend.Models

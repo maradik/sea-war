@@ -1,6 +1,4 @@
-﻿using Backend.Controllers.v1.Dto;
-
-namespace Backend.Controllers.v2.Dto
+﻿namespace Backend.Controllers.v2.Dto
 {
     public class FireResponseDto
     {

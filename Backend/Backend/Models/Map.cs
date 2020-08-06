@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using Backend.Controllers.v1.Dto;
 
 namespace Backend.Models
 {
@@ -96,45 +95,6 @@ namespace Backend.Models
             Ships = Ships.Append(ship).ToArray();
 
             return true;
-        }
-
-        public MapDto ToMapDto()
-        {
-            var mapDto = new MapDto();
-
-            for (var i = 0; i < 10; i++)
-            {
-                for (var j = 0; j < 10; j++)
-                {
-                    mapDto.Cells[i, j] = new Cell {X = i, Y = j, Status = Cells[i, j].Status};
-                }
-            }
-
-            return mapDto;
-        }
-
-        public MapForEnemyDto ToMapForEnemyDto()
-        {
-            var mapDto = new MapForEnemyDto();
-
-            for (var i = 0; i < 10; i++)
-            {
-                for (var j = 0; j < 10; j++)
-                {
-                    mapDto.Cells[i, j] = new CellForEnemyDto
-                    {
-                        Status = Cells[i, j].Status switch
-                        {
-                            CellStatus.EmptyFired => CellForEnemyDtoStatus.Missed,
-                            CellStatus.EngagedByShipFired => CellForEnemyDtoStatus.Damaged,
-                            CellStatus.ShipNeighbour => CellForEnemyDtoStatus.ShipNeighbour,
-                            _ => CellForEnemyDtoStatus.Unknown
-                        }
-                    };
-                }
-            }
-
-            return mapDto;
         }
     }
 }

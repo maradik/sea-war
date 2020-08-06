@@ -31,7 +31,17 @@ namespace Backend.Controllers.v1
 
         [HttpGet]
         [Route("{roomId}/getStatus")]
-        public GetRoomStatusResponseDto GetStatus([FromRoute] Guid roomId, [FromQuery] Guid playerId) =>
-            roomManager.GetStatus(roomId, playerId).ToDto();
+        public GetRoomStatusResponseDto GetStatus([FromRoute] Guid roomId, [FromQuery] Guid playerId)
+        {
+            var room = roomManager.GetRoom(roomId);
+
+            return new GetRoomStatusResponseDto
+            {
+                PlayerId = playerId,
+                RoomId = room.Id,
+                RoomStatus = room.Status.ToDto(),
+                AnotherPlayerName = room.GetEnemyPlayerFor(playerId)?.Name
+            };
+        }
     }
 }

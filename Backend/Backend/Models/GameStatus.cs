@@ -1,4 +1,4 @@
-namespace Backend.Controllers.v1.Dto
+namespace Backend.Models
 {
     public enum GameStatus
     {

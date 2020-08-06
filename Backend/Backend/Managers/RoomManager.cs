@@ -13,19 +13,6 @@ namespace Backend.Managers
         public RoomManager(RoomCreator roomCreator) =>
             this.roomCreator = roomCreator;
 
-        public GetRoomStatusResult GetStatus(Guid roomId, Guid playerId)
-        {
-            var room = rooms[roomId];
-            room.Touch();
-            return new GetRoomStatusResult
-            {
-                PlayerId = playerId,
-                RoomId = room.Id,
-                RoomStatus = room.Status,
-                AnotherPlayerName = room.GetEnemyPlayerFor(playerId)?.Name
-            };
-        }
-
         public FireResponse Fire(int x, int y, Guid roomId, Guid playerId) =>
             rooms[roomId].Fire(x, y, playerId);
 
@@ -38,7 +25,7 @@ namespace Backend.Managers
             {
                 UpdateRoomStatuses(playerId);
             }
-            
+
             var room = roomCreator.CreateRoom();
             room.Enter(playerId, playerName);
             rooms.TryAdd(room.Id, room);
@@ -85,6 +72,7 @@ namespace Backend.Managers
         public Room GetRoom(Guid roomId)
         {
             rooms.TryGetValue(roomId, out var room);
+            room?.Touch();
             return room;
         }
 

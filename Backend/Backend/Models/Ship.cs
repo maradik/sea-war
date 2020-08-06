@@ -20,10 +20,4 @@ namespace Backend.Models
             return Cells.Any(cell => cell.X == x && cell.Y == y);
         }
     }
-
-    public enum ShipStatus
-    {
-        Alive,
-        Killed
-    }
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using Backend.Controllers.v1.Dto;
 
 namespace Backend.Models
 {
