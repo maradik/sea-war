@@ -1,4 +1,5 @@
 ﻿using System;
+using Backend.Controllers.v2.Dto;
 using Backend.Managers;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,68 +14,32 @@ namespace Backend.Controllers.v2
         public RoomController(RoomManager roomManager) =>
             this.roomManager = roomManager;
 
-        [HttpGet]
-        public GetRoomListResponseDto List([FromQuery] Guid playerId) =>
-            throw new NotImplementedException();
+        [HttpGet("opened")]
+        public RoomListResponseDto GetOpenedRooms([FromQuery] Guid playerId) =>
+            roomManager.GetOpenedRooms().ToDto();
 
         [HttpPost]
         public CreateRoomResponseDto Create([FromBody] CreateRoomRequestDto requestDto, [FromQuery] Guid playerId) =>
-            throw new NotImplementedException();
-        
+            roomManager.CreateRoom(playerId, requestDto.PlayerName).ToDto();
+
         [HttpPost]
-        [Route("{roomId}/Join")]
+        [Route("{roomId}/join")]
         public JoinRoomResponseDto Join([FromBody] JoinRoomRequestDto requestDto, [FromQuery] Guid playerId) =>
-            throw new NotImplementedException();
+            roomManager.Join(requestDto.RoomId, playerId, requestDto.PlayerName).ToDto();
 
         [HttpGet]
         [Route("{roomId}")]
-        public GetRoomResponseDto Get([FromRoute] Guid roomId, [FromQuery] Guid playerId) =>
-            throw new NotImplementedException();
+        public RoomDto Get([FromRoute] Guid roomId, [FromQuery] Guid playerId) =>
+            roomManager.GetRoom(roomId).ToDto();
 
         [HttpGet]
-        [Route("{roomId}/Game")]
-        public GetGameResponseDto GetGame([FromRoute] Guid roomId, [FromQuery] Guid playerId) =>
-            throw new NotImplementedException();
+        [Route("{roomId}/game")]
+        public GameDto GetGame([FromRoute] Guid roomId, [FromQuery] Guid playerId) =>
+            roomManager.GetGame(roomId, playerId).ToDto();
 
         [HttpPost]
-        [Route("{roomId}/Game/Fire")]
+        [Route("{roomId}/game/fire")]
         public FireResponseDto Fire([FromBody] FireRequestDto dto, [FromRoute] Guid roomId, [FromQuery] Guid playerId) =>
-            throw new NotImplementedException();
-    }
-
-    public class FireRequestDto
-    {
-    }
-
-    public class FireResponseDto
-    {
-    }
-
-    public class GetGameResponseDto
-    {
-    }
-
-    public class GetRoomResponseDto
-    {
-    }
-
-    public class JoinRoomResponseDto
-    {
-    }
-
-    public class CreateRoomRequestDto
-    {
-    }
-
-    public class CreateRoomResponseDto
-    {
-    }
-
-    public class JoinRoomRequestDto
-    {
-    }
-
-    public class GetRoomListResponseDto
-    {
+            roomManager.Fire(dto.X, dto.Y, roomId, playerId).ToDto();
     }
 }

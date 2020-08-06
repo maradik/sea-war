@@ -10,6 +10,7 @@ namespace Backend.Models
     {
         private static readonly TimeSpan idleTimeout = TimeSpan.FromSeconds(30);
         private static readonly TimeSpan fireTimeout = TimeSpan.FromSeconds(15);
+        private static readonly HashSet<RoomStatus> openedRoomStatuses = new HashSet<RoomStatus>{RoomStatus.EmptyRoom, RoomStatus.NotReady};
         private static readonly HashSet<RoomStatus> activeRoomStatuses = new HashSet<RoomStatus>{RoomStatus.EmptyRoom, RoomStatus.NotReady, RoomStatus.Ready};
         private readonly PlayerBuilder playerBuilder;
         private RoomStatus status;
@@ -20,7 +21,8 @@ namespace Backend.Models
             Touch();
         }
 
-        public bool HasActiveStatus => activeRoomStatuses.Contains(Status);
+        public bool IsActive => activeRoomStatuses.Contains(Status);
+        public bool IsOpened => openedRoomStatuses.Contains(Status);
         public Guid Id { get; set; }
         public Player Player1 { get; set; }
         public Player Player2 { get; set; }
@@ -29,7 +31,7 @@ namespace Backend.Models
             get
             {
                 var currentTicks = DateTime.Now.Ticks;
-                if (HasActiveStatus && TimeSpan.FromTicks(currentTicks - LastActivityTicks) > idleTimeout)
+                if (IsActive && TimeSpan.FromTicks(currentTicks - LastActivityTicks) > idleTimeout)
                 {
                     status = RoomStatus.Orphaned;
                 }
@@ -58,13 +60,18 @@ namespace Backend.Models
                 return Player1;
             }
 
+            if (Player1.Id == playerId)
+            {
+                throw new ArgumentException("Can't append player twice", nameof(playerId));
+            }
+
             Player2 = player;
             Status = RoomStatus.Ready;
             CurrentPlayerId = Player1.Id;
             return Player2;
         }
 
-        public FireResponseDto Fire(FireRequestDto dto, Guid playerId)
+        public FireResponse Fire(int x, int y, Guid playerId)
         {
             if (Status != RoomStatus.Ready)
                 throw new InvalidOperationException("Room is not ready");
@@ -72,15 +79,15 @@ namespace Backend.Models
             Touch();
 
             var enemyPlayer = GetEnemyPlayerFor(playerId);
-            var fireResult = enemyPlayer.ProcessEnemyMove(dto.X, dto.Y);
+            var fireResult = enemyPlayer.ProcessEnemyMove(x, y);
             CurrentPlayerId = fireResult != FireResult.Missed
                 ? playerId
                 : enemyPlayer.Id;
 
             Status = !enemyPlayer.AnyShipsAlive() ? RoomStatus.Finished : Status;
-            return new FireResponseDto
+            return new FireResponse
             {
-                EnemyMap = enemyPlayer.OwnMap.ToMapForEnemyDto()
+                EnemyMap = enemyPlayer.OwnMap
             };
         }
 
@@ -88,15 +95,15 @@ namespace Backend.Models
         public void Touch() =>
             LastActivityTicks = DateTime.Now.Ticks;
 
-        public GetGameStatusResponseDto GetGameStatus(Guid playerId)
+        public Game GetGameFor(Guid playerId)
         {
             if (Status == RoomStatus.Orphaned)
             {
-                return new GetGameStatusResponseDto
+                return new Game
                 {
                     FinishReason = FinishReason.ConnectionLost,
                     GameStatus = GameStatus.Finish,
-                    MyMap = GetMyPlayer(playerId).OwnMap.ToMapDto(),
+                    MyMap = GetMyPlayer(playerId).OwnMap,
                     YourChoiceTimeout = TimeSpan.Zero
                 };
             }
@@ -106,10 +113,10 @@ namespace Backend.Models
                 : CurrentPlayerId == playerId
                     ? GameStatus.YourChoice
                     : GameStatus.PendingForFriendChoice;
-            return new GetGameStatusResponseDto
+            return new Game
             {
                 YourChoiceTimeout = gameStatus == GameStatus.YourChoice ? fireTimeout : TimeSpan.Zero,
-                MyMap = GetMyPlayer(playerId).OwnMap.ToMapDto(),
+                MyMap = GetMyPlayer(playerId).OwnMap,
                 GameStatus = gameStatus,
                 FinishReason = gameStatus == GameStatus.Finish
                     ? CurrentPlayerId == playerId

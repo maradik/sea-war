@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
-using Backend.Controllers.v1.Dto;
 using Backend.Models;
 
 namespace Backend.Managers
@@ -28,11 +26,62 @@ namespace Backend.Managers
             };
         }
 
-        public FireResponseDto Fire(FireRequestDto dto, Guid roomId, Guid playerId) =>
-            rooms[roomId].Fire(dto, playerId);
+        public FireResponse Fire(int x, int y, Guid roomId, Guid playerId) =>
+            rooms[roomId].Fire(x, y, playerId);
 
-        public GetGameStatusResponseDto GetGameStatus(Guid roomId, Guid playerId) =>
-            rooms[roomId].GetGameStatus(playerId);
+        public Game GetGame(Guid roomId, Guid playerId) =>
+            rooms[roomId].GetGameFor(playerId);
+
+        public CreateRoomResult CreateRoom(Guid playerId, string playerName)
+        {
+            var room = roomCreator.CreateRoom();
+            room.Enter(playerId, playerName);
+            rooms.TryAdd(room.Id, room);
+
+            return new CreateRoomResult
+            {
+                RoomId = room.Id
+            };
+        }
+
+        public JoinRoomResult Join(Guid roomId, Guid playerId, string playerName)
+        {
+            lock (rooms)
+            {
+                UpdateRoomStatuses(playerId);
+                if (rooms.TryGetValue(roomId, out var room))
+                {
+                    try
+                    {
+                        room.Enter(playerId, playerName);
+
+                        return new JoinRoomResult
+                        {
+                            Success = true
+                        };
+                    }
+                    catch (Exception e) when (e is ArgumentException || e is InvalidOperationException)
+                    {
+                    }
+                }
+            }
+
+            return new JoinRoomResult
+            {
+                Success = false
+            };
+        }
+
+        public Room[] GetOpenedRooms()
+        {
+            return rooms.Values.Where(x => x.IsOpened).OrderByDescending(x => x.LastActivityTicks).ToArray();
+        }
+
+        public Room GetRoom(Guid roomId)
+        {
+            rooms.TryGetValue(roomId, out var room);
+            return room;
+        }
 
         [Obsolete]
         public EnterOrCreateRoomResult EnterOrCreateRoom(Guid playerId, string playerName)
@@ -64,7 +113,7 @@ namespace Backend.Managers
         {
             foreach (var room in rooms.Select(x => x.Value))
             {
-                if (room.HasActiveStatus && (room.Player1?.Id == playerId || room.Player2?.Id == playerId))
+                if (room.IsActive && (room.Player1?.Id == playerId || room.Player2?.Id == playerId))
                 {
                     room.Status = RoomStatus.Orphaned;
                 }

@@ -22,12 +22,12 @@ namespace Backend.Controllers.v1
         [HttpGet]
         [Route("{roomId}/Game/GetStatus")]
         public GetGameStatusResponseDto GetGameStatus([FromRoute] Guid roomId, [FromQuery] Guid playerId) =>
-            roomManager.GetGameStatus(roomId, playerId);
+            roomManager.GetGame(roomId, playerId).ToDto();
 
         [HttpPost]
         [Route("{roomId}/Game/Fire")]
         public FireResponseDto Fire([FromBody] FireRequestDto dto, [FromRoute] Guid roomId, [FromQuery] Guid playerId) =>
-            roomManager.Fire(dto, roomId, playerId);
+            roomManager.Fire(dto.X, dto.Y, roomId, playerId).ToDto();
 
         [HttpGet]
         [Route("{roomId}/getStatus")]
