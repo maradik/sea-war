@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Backend.Models
+﻿namespace Backend.Models
 {
     public class Cell
     {

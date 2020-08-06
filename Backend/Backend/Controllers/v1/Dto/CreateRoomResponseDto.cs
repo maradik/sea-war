@@ -1,13 +1,14 @@
 using System;
-using Backend.Models;
 
-namespace Backend.Controllers.Dto
+namespace Backend.Controllers.v1.Dto
 {
-    public class GetRoomStatusResponseDto
+    public class CreateRoomResponseDto
     {
         public Guid RoomId { get; set; }
-        public RoomStatus RoomStatus { get; set; }
+        public RoomStatusDto RoomStatus { get; set; }
         public string AnotherPlayerName { get; set; }
+
+        [Obsolete]
         public Guid PlayerId { get; set; }
     }
 }

@@ -1,4 +1,3 @@
-using Backend.Controllers;
 using Backend.Managers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -12,17 +11,15 @@ namespace Backend
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
-        {
+        public Startup(IConfiguration configuration) =>
             Configuration = configuration;
-        }
 
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<GameManager>();
+            services.AddSingleton<RoomManager>();
             services.AddSingleton<RoomManager>();
             services.AddTransient<RoomCreator>();
             services.AddTransient<PlayerBuilder>();

@@ -1,4 +1,4 @@
-namespace Backend.Controllers.Dto
+﻿namespace Backend.Controllers.v2.Dto
 {
     public class FireRequestDto
     {

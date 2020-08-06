@@ -1,13 +1,12 @@
-using System;
-using Backend.Models;
+﻿using System;
 
-namespace Backend.Controllers.Dto
+namespace Backend.Models
 {
-    public class GetGameStatusResponseDto
+    public class Game
     {
         public GameStatus GameStatus { get; set; }
         public TimeSpan YourChoiceTimeout { get; set; }
         public FinishReason? FinishReason { get; set; }
-        public MapDto MyMap { get; set; }
+        public Map MyMap { get; set; }
     }
 }

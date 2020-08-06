@@ -1,10 +1,7 @@
-using System;
-
-namespace Backend.Controllers.Dto
+﻿namespace Backend.Controllers.v2.Dto
 {
     public class CreateRoomRequestDto
     {
         public string PlayerName { get; set; }
-        public Guid? PlayerId { get; set; }
     }
 }
