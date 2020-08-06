@@ -1,5 +1,4 @@
-﻿using Backend.Managers;
-using Backend.Models;
+﻿using Backend.Models;
 
 namespace Backend.Controllers.v1.Dto
 {

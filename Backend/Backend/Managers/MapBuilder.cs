@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Backend.Models;
 
 namespace Backend.Managers
@@ -84,9 +83,11 @@ namespace Backend.Managers
                     {
                         cells.Add(new Cell {X = i + k, Y = j, Status = CellStatus.EngagedByShip});
                     }
+
                     result.Add(new Ship {Cells = cells.ToArray()});
                 }
             }
+
             for (var i = 0; i < 10; ++i)
             {
                 for (var j = 0; j <= 10 - size; ++j)
@@ -96,9 +97,11 @@ namespace Backend.Managers
                     {
                         cells.Add(new Cell {X = i, Y = j + k, Status = CellStatus.EngagedByShip});
                     }
+
                     result.Add(new Ship {Cells = cells.ToArray()});
                 }
             }
+
             return result;
         }
     }

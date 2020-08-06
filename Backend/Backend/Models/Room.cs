@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Security.Policy;
 using Backend.Controllers.v1.Dto;
 using Backend.Managers;
 
@@ -10,8 +9,8 @@ namespace Backend.Models
     {
         private static readonly TimeSpan idleTimeout = TimeSpan.FromSeconds(30);
         private static readonly TimeSpan fireTimeout = TimeSpan.FromSeconds(15);
-        private static readonly HashSet<RoomStatus> openedRoomStatuses = new HashSet<RoomStatus>{RoomStatus.EmptyRoom, RoomStatus.NotReady};
-        private static readonly HashSet<RoomStatus> activeRoomStatuses = new HashSet<RoomStatus>{RoomStatus.EmptyRoom, RoomStatus.NotReady, RoomStatus.Ready};
+        private static readonly HashSet<RoomStatus> openedRoomStatuses = new HashSet<RoomStatus> {RoomStatus.EmptyRoom, RoomStatus.NotReady};
+        private static readonly HashSet<RoomStatus> activeRoomStatuses = new HashSet<RoomStatus> {RoomStatus.EmptyRoom, RoomStatus.NotReady, RoomStatus.Ready};
         private readonly PlayerBuilder playerBuilder;
         private RoomStatus status;
 
@@ -26,6 +25,7 @@ namespace Backend.Models
         public Guid Id { get; set; }
         public Player Player1 { get; set; }
         public Player Player2 { get; set; }
+
         public RoomStatus Status
         {
             get
@@ -47,7 +47,9 @@ namespace Backend.Models
         public Player Enter(Guid playerId, string playerName)
         {
             if (Status != RoomStatus.EmptyRoom && Status != RoomStatus.NotReady)
+            {
                 throw new InvalidOperationException("Room already filled");
+            }
 
             Touch();
 
@@ -74,7 +76,9 @@ namespace Backend.Models
         public FireResponse Fire(int x, int y, Guid playerId)
         {
             if (Status != RoomStatus.Ready)
+            {
                 throw new InvalidOperationException("Room is not ready");
+            }
 
             Touch();
 

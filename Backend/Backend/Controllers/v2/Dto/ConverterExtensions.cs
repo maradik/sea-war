@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using Backend.Managers;
 using Backend.Models;
 
 namespace Backend.Controllers.v2.Dto

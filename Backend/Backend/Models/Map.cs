@@ -20,9 +20,14 @@ namespace Backend.Models
                 for (var j = -1; j <= 1; ++j)
                 {
                     if (i == 0 && j == 0)
+                    {
                         continue;
+                    }
+
                     if (cell.X + i >= 0 && cell.X + i < 10 && cell.Y + j >= 0 && cell.Y + j < 10)
+                    {
                         result.Add(Cells[cell.X + i, cell.Y + j]);
+                    }
                 }
             }
 
@@ -59,17 +64,25 @@ namespace Backend.Models
             foreach (var cell in ship.Cells)
             {
                 if (Cells[cell.X, cell.Y].Status != CellStatus.Empty)
+                {
                     return false;
+                }
+
                 for (var i = -1; i <= 1; ++i)
                 {
                     for (var j = -1; j <= 1; ++j)
                     {
                         if (i == 0 && j == 0)
+                        {
                             continue;
+                        }
+
                         if (cell.X + i >= 0 && cell.X + i < 10 && cell.Y + j >= 0 && cell.Y + j < 10)
                         {
                             if (Cells[cell.X + i, cell.Y + j].Status != CellStatus.Empty)
+                            {
                                 return false;
+                            }
                         }
                     }
                 }
@@ -93,7 +106,7 @@ namespace Backend.Models
             {
                 for (var j = 0; j < 10; j++)
                 {
-                    mapDto.Cells[i, j] = new Cell{X = i, Y = j, Status =  Cells[i, j].Status};
+                    mapDto.Cells[i, j] = new Cell {X = i, Y = j, Status = Cells[i, j].Status};
                 }
             }
 

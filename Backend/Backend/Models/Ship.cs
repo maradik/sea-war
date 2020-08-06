@@ -1,11 +1,14 @@
 using System.Linq;
-using Microsoft.AspNetCore.Http;
 
 namespace Backend.Models
 {
     public class Ship
     {
         public Cell[] Cells { get; set; }
+
+        public ShipStatus Status => Cells.Any(cell => cell.Status == CellStatus.EngagedByShip)
+            ? ShipStatus.Alive
+            : ShipStatus.Killed;
 
         public void Damage(int x, int y)
         {
@@ -16,10 +19,6 @@ namespace Backend.Models
         {
             return Cells.Any(cell => cell.X == x && cell.Y == y);
         }
-
-        public ShipStatus Status => Cells.Any(cell => cell.Status == CellStatus.EngagedByShip)
-            ? ShipStatus.Alive
-            : ShipStatus.Killed;
     }
 
     public enum ShipStatus

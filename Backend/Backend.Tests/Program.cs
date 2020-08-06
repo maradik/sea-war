@@ -18,6 +18,7 @@ namespace Backend.Tests
                     map.Cells[i, j] = new Cell {X = i, Y = j};
                 }
             }
+
             var result = map.GetCellNeighbours(new Cell {X = 1, Y = 1});
         }
     }
