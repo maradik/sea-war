@@ -19,8 +19,8 @@ namespace Backend.Models
             Touch();
         }
 
-        public bool IsActive => activeRoomStatuses.Contains(Status);
-        public bool IsOpened => openedRoomStatuses.Contains(Status);
+        public bool IsActive => activeRoomStatuses.Contains(status);
+        public bool IsOpened => openedRoomStatuses.Contains(status);
         public Guid Id { get; set; }
         public Player Player1 { get; set; }
         public Player Player2 { get; set; }
