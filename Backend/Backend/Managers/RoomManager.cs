@@ -34,6 +34,11 @@ namespace Backend.Managers
 
         public CreateRoomResult CreateRoom(Guid playerId, string playerName)
         {
+            lock (rooms)
+            {
+                UpdateRoomStatuses(playerId);
+            }
+            
             var room = roomCreator.CreateRoom();
             room.Enter(playerId, playerName);
             rooms.TryAdd(room.Id, room);
