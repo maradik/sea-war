@@ -12,7 +12,7 @@ namespace SeaWarBot
         private static string[] playerNames = {"Федот-стрелец", "Иван Петрович", "Михалыч", "Super killer", "Marika-38"};
         private readonly Random random = new Random();
         private readonly ILogger logger = new Logger(nameof(Gamer));
-        private readonly Client client = new Client("http://127.0.0.1:8765/", Settings.Timeout, new DummyLogger());
+        private readonly Client client = new Client(Settings.ServerUri, Settings.Timeout, new DummyLogger());
         
         private readonly Guid playerId = Guid.NewGuid();
         private string playerName;

@@ -51,7 +51,13 @@
                                 Grid.Column="0" Grid.Row="3" />
                     </Grid>
 
-                    <ListView Grid.Column="1" Grid.Row="1" ItemsSource="{Binding Rooms}" SelectionMode="None" ItemTapped="OnRoomSelected">
+                    <ListView Grid.Column="1" Grid.Row="1"
+                              ItemsSource="{Binding Rooms}"
+                              SelectionMode="None"
+                              ItemTapped="OnRoomSelected"
+                              IsPullToRefreshEnabled="True"
+                              RefreshCommand="{Binding RefreshRooms}"
+                              IsRefreshing="{Binding IsRoomsRefreshing}">
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <TextCell Text="{Binding Title}"/>

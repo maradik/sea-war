@@ -7,7 +7,6 @@ using Integration.Dtos.v2;
 using SeaWar.Annotations;
 using SeaWar.Client;
 using SeaWar.DomainModels;
-using SeaWar.Extensions;
 using SeaWar.View;
 using Xamarin.Forms;
 
@@ -20,6 +19,7 @@ namespace SeaWar.ViewModels
         private readonly IClient client;
         private bool pageEnabled;
         private Room[] rooms;
+        private bool isRoomsRefreshing;
 
         public MainMenuPageViewModel(GameModel gameModel, Func<GameModel, GamePage> createGamePage, Func<GameModel, WaitGamePage> createWaitGamePage, IClient client)
         {
@@ -46,8 +46,8 @@ namespace SeaWar.ViewModels
                 var application = (App) Application.Current;
                 application.BeginGame();
             });
-
-            RefreshRoomsAsync().ContinueInParallel();
+            RefreshRooms = new Command(async _ => await RefreshRoomsAsync().ConfigureAwait(true));
+            RefreshRooms.Execute(null);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -72,9 +72,20 @@ namespace SeaWar.ViewModels
             }
         }
 
+        public bool IsRoomsRefreshing
+        {
+            get => isRoomsRefreshing;
+            set
+            {
+                isRoomsRefreshing = value;
+                OnPropertyChanged(nameof(IsRoomsRefreshing));
+            }
+        }
+
         public Command RestartGame { get; }
         public Command CreateRoomWithBot { get; }
         public Command CreateRoomWithPlayer { get; }
+        public Command RefreshRooms { get; }
 
         public async Task JoinRoom(Room room, Func<Task> onFail)
         {
@@ -101,8 +112,10 @@ namespace SeaWar.ViewModels
 
         private async Task RefreshRoomsAsync()
         {
+            IsRoomsRefreshing = true;
             var roomList = await client.GetOpenedRoomsAsync(gameModel.PlayerId).ConfigureAwait(true);
             Rooms = roomList.Rooms.Select(x => new Room {Id = x.Id, PlayerName = x.Players.First().Name}).ToArray();
+            IsRoomsRefreshing = false;
         }
     }
 }

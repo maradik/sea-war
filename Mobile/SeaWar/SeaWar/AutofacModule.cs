@@ -9,7 +9,6 @@ namespace SeaWar
     {
         protected override void Load(ContainerBuilder builder)
         {
-            // builder.RegisterType<FakeClient>().As<IClient>().SingleInstance();
             builder.Register(context =>
                    {
                        var logger = context.Resolve<ILogger>();
