@@ -8,10 +8,14 @@ namespace Backend.Managers
     public class RoomManager
     {
         private readonly RoomCreator roomCreator;
+        private readonly BotManager botManager;
         private readonly ConcurrentDictionary<Guid, Room> rooms = new ConcurrentDictionary<Guid, Room>();
 
-        public RoomManager(RoomCreator roomCreator) =>
+        public RoomManager(RoomCreator roomCreator, BotManager botManager)
+        {
             this.roomCreator = roomCreator;
+            this.botManager = botManager;
+        }
 
         public FireResponse Fire(int x, int y, Guid roomId, Guid playerId) =>
             rooms[roomId].Fire(x, y, playerId);
@@ -19,7 +23,7 @@ namespace Backend.Managers
         public Game GetGame(Guid roomId, Guid playerId) =>
             rooms[roomId].GetGameFor(playerId);
 
-        public CreateRoomResult CreateRoom(Guid playerId, string playerName)
+        public CreateRoomResult CreateRoom(Guid playerId, string playerName, bool withBot)
         {
             lock (rooms)
             {
@@ -29,6 +33,11 @@ namespace Backend.Managers
             var room = roomCreator.CreateRoom();
             room.Enter(playerId, playerName);
             rooms.TryAdd(room.Id, room);
+
+            if (withBot)
+            {
+                botManager.AddBot(room);
+            }
 
             return new CreateRoomResult
             {

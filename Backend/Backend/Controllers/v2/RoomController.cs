@@ -20,7 +20,7 @@ namespace Backend.Controllers.v2
 
         [HttpPost]
         public CreateRoomResponseDto Create([FromBody] CreateRoomRequestDto requestDto, [FromQuery] Guid playerId) =>
-            roomManager.CreateRoom(playerId, requestDto.PlayerName).ToDto();
+            roomManager.CreateRoom(playerId, requestDto.PlayerName, requestDto.RoomType == RoomTypeDto.SinglePlayer).ToDto();
 
         [HttpPost("{roomId}/join")]
         public JoinRoomResponseDto Join([FromBody] JoinRoomRequestDto requestDto, [FromRoute] Guid roomId, [FromQuery] Guid playerId) =>

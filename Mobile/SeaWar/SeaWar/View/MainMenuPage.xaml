@@ -33,7 +33,7 @@
                         </Grid.ColumnDefinitions>
                         
                         <Button Text="Один игрок" 
-                                Command="{Binding CreateRoomWithBot}" 
+                                Command="{Binding CreateRoomWithSinglePlayer}" 
                                 HorizontalOptions="Center" 
                                 FontSize="22"
                                 BackgroundColor="#ffa822"
@@ -42,7 +42,7 @@
                                 Grid.Column="0" Grid.Row="1" />
 
                         <Button Text="Два игрока"
-                                Command="{Binding CreateRoomWithPlayer}"
+                                Command="{Binding CreateRoomWithTwoPlayers}"
                                 HorizontalOptions="Center"
                                 FontSize="22"
                                 BackgroundColor="#ffa822"

@@ -27,17 +27,19 @@ namespace SeaWar.ViewModels
             this.createGamePage = createGamePage;
             this.client = client;
             PageEnabled = true;
-            CreateRoomWithBot = new Command(async _ =>
+            CreateRoomWithSinglePlayer = new Command(async _ =>
             {
                 PageEnabled = false;
-                var room = await client.CreateRoomAsync(new CreateRoomRequestDto {PlayerName = gameModel.PlayerName}, gameModel.PlayerId).ConfigureAwait(true);
+                var createRoomRequest = new CreateRoomRequestDto {PlayerName = gameModel.PlayerName, RoomType = RoomTypeDto.SinglePlayer};
+                var room = await client.CreateRoomAsync(createRoomRequest, gameModel.PlayerId).ConfigureAwait(true);
                 gameModel.RoomId = room.RoomId;
                 await Application.Current.MainPage.Navigation.PushModalAsync(createWaitGamePage(gameModel)).ConfigureAwait(true);
             });
-            CreateRoomWithPlayer = new Command(async _ =>
+            CreateRoomWithTwoPlayers = new Command(async _ =>
             {
                 PageEnabled = false;
-                var room = await client.CreateRoomAsync(new CreateRoomRequestDto {PlayerName = gameModel.PlayerName}, gameModel.PlayerId).ConfigureAwait(true);
+                var createRoomRequest = new CreateRoomRequestDto {PlayerName = gameModel.PlayerName, RoomType = RoomTypeDto.TwoPlayers};
+                var room = await client.CreateRoomAsync(createRoomRequest, gameModel.PlayerId).ConfigureAwait(true);
                 gameModel.RoomId = room.RoomId;
                 await Application.Current.MainPage.Navigation.PushModalAsync(createWaitGamePage(gameModel)).ConfigureAwait(true);
             });
@@ -83,8 +85,8 @@ namespace SeaWar.ViewModels
         }
 
         public Command RestartGame { get; }
-        public Command CreateRoomWithBot { get; }
-        public Command CreateRoomWithPlayer { get; }
+        public Command CreateRoomWithSinglePlayer { get; }
+        public Command CreateRoomWithTwoPlayers { get; }
         public Command RefreshRooms { get; }
 
         public async Task JoinRoom(Room room, Func<Task> onFail)

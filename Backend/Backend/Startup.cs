@@ -20,7 +20,8 @@ namespace Backend
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<RoomManager>();
-            services.AddSingleton<RoomManager>();
+            services.AddSingleton<BotManager>();
+            services.AddSingleton<BotCreator>();
             services.AddTransient<RoomCreator>();
             services.AddTransient<PlayerBuilder>();
             services.AddTransient<MapBuilder>();
