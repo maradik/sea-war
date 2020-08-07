@@ -9,13 +9,13 @@ namespace SeaWar.View
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class WelcomePage : ContentPage
     {
-        public WelcomePage(GameModel model, Func<GameModel, WelcomePageModelView> createViewModel)
+        public WelcomePage(GameModel model, Func<GameModel, WelcomePageViewModel> createViewModel)
         {
             InitializeComponent();
             BindingContext = createViewModel(model);
         }
 
-        private WelcomePageModelView Model => (BindingContext as WelcomePageModelView);
+        private WelcomePageViewModel Model => (BindingContext as WelcomePageViewModel);
         
         protected override void OnAppearing()
         {

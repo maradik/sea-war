@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Integration.Dtos.v2;
 using SeaWar.Client;
-using SeaWar.Client.Contracts;
 using SeaWar.DomainModels;
 using SeaWar.View;
 using Xamarin.Forms;
@@ -41,27 +42,22 @@ namespace SeaWar.ViewModels
             {
                 try
                 {
-                    var parameters = new GetRoomStatusParameters
+                    var room = await client.GetRoomAsync(gameModel.RoomId, gameModel.PlayerId).ConfigureAwait(true);
+                    switch (room.Status)
                     {
-                        RoomId = gameModel.RoomId,
-                        PlayerId = gameModel.PlayerId
-                    };
-                    var getRoomStatusResponse = await client.GetRoomStatusAsync(parameters);
-                    switch (getRoomStatusResponse.RoomStatus)
-                    {
-                        case CreateRoomStatus.NotReady:
+                        case RoomStatusDto.Opened:
                             break;
-                        case CreateRoomStatus.Ready:
-                            gameModel.AnotherPlayerName = getRoomStatusResponse.AnotherPlayerName;
+                        case RoomStatusDto.Ready:
+                            gameModel.AnotherPlayerName = room.Players.Single(x => x.Id != gameModel.PlayerId).Name;
                             Device.BeginInvokeOnMainThread(async () => {
-                                await Application.Current.MainPage.Navigation.PushModalAsync(createGamePage(gameModel));
+                                await Application.Current.MainPage.Navigation.PushModalAsync(createGamePage(gameModel)).ConfigureAwait(true);
                             });
                             return;
                         default:
-                            throw new ArgumentOutOfRangeException(nameof(getRoomStatusResponse.RoomStatus), getRoomStatusResponse.RoomStatus, null);
+                            throw new ArgumentOutOfRangeException(nameof(room.Status), room.Status, null);
                     }
 
-                    await Task.Delay(millisecondsForRepeatServerRequest);
+                    await Task.Delay(millisecondsForRepeatServerRequest).ConfigureAwait(true);
                 }
                 catch (Exception ex)
                 {
@@ -72,7 +68,7 @@ namespace SeaWar.ViewModels
 
         public void StartWaitAnotherPlayer()
         {
-            Task.Run(async () => await WaitGameReadyAsync());
+            Task.Run(async () => await WaitGameReadyAsync().ConfigureAwait(true));
         }
     }
 }

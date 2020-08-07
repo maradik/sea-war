@@ -15,7 +15,7 @@
                 </Entry.Behaviors>
             </Entry>
             <Label Text="{Binding ErrorMessage}" TextColor="Red"/>
-            <Button Text="Начать игру" 
+            <Button Text="Далее" 
                     Command="{Binding StartGame}" 
                     IsEnabled="{Binding IsValid}" 
                     HorizontalOptions="Center" 

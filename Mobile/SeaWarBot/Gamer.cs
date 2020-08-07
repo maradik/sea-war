@@ -1,40 +1,46 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
+using Integration.Dtos.v2;
 using SeaWar;
 using SeaWar.Client;
-using SeaWar.Client.Contracts;
 
 namespace SeaWarBot
 {
     public class Gamer
     {
+        private static string[] playerNames = {"Федот-стрелец", "Иван Петрович", "Михалыч", "Super killer", "Marika-38"};
         private readonly Random random = new Random();
         private readonly ILogger logger = new Logger(nameof(Gamer));
         private readonly Client client = new Client(Settings.ServerUri, Settings.Timeout, new DummyLogger());
         
         private readonly Guid playerId = Guid.NewGuid();
-        private string playerName = "Федот-стрелец";
+        private string playerName;
+
+        public Gamer() =>
+            playerName = playerNames[random.Next(playerNames.Length)];
 
         public async Task PlayAsync()
         {
-            var room = await CreateRoom();
-            var opponentMap = EnemyMap.Empty;
+            logger.Info($"Я в игре, мое имя {playerName}, id={playerId}");
+
+            var room = await GetRoomAsync().ConfigureAwait(false);
+            var opponentMap = CreateEmptyOpponentMapDto();
             
             while (true)
             {
-                var getGameStatusParameters = new GetGameStatusParameters {PlayerId = playerId, RoomId = room.RoomId};
-                var gameStatus = await client.GetGameStatusAsync(getGameStatusParameters);
+                var game = await client.GetGameAsync(room.Id, playerId).ConfigureAwait(false);
 
-                switch (gameStatus.GameStatus)
+                switch (game.Status)
                 {
-                    case GameStatus.YourChoice:
-                        await FireAsync(opponentMap, room);
+                    case GameStatusDto.YourChoice:
+                        opponentMap = await FireAsync(opponentMap, room).ConfigureAwait(false);
                         break;
-                    case GameStatus.PendingForFriendChoice:
-                        await Task.Delay(1000);
+                    case GameStatusDto.PendingForFriendChoice:
+                        await Task.Delay(1000).ConfigureAwait(false);
                         break;
-                    case GameStatus.Finish:
-                        logger.Info($"Игра окончена, причина {gameStatus.FinishReason}");
+                    case GameStatusDto.Finish:
+                        logger.Info($"Игра окончена, причина {game.FinishReason}");
                         return;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -42,36 +48,82 @@ namespace SeaWarBot
             }
         }
 
-        private async Task FireAsync(EnemyMap opponentMap, RoomResponse room)
+        private MapForEnemyDto CreateEmptyOpponentMapDto()
+        {
+            var mapForEnemyDto = new MapForEnemyDto();
+            for (var x = 0; x < mapForEnemyDto.Cells.GetLength(0); x++)
+            {
+                for (var y = 0; y < mapForEnemyDto.Cells.GetLength(1); y++)
+                {
+                    mapForEnemyDto.Cells[x, y] = new CellForEnemyDto();
+                }
+            }
+
+            return mapForEnemyDto;
+        }
+
+        private async Task<MapForEnemyDto> FireAsync(MapForEnemyDto opponentMap, RoomDto room)
         {
             while (true)
             {
                 var (x, y) = (random.Next(10), random.Next(10));
-                if (opponentMap.Cells[x, y].Status == EnemyCellStatus.Unknown)
+                if (opponentMap.Cells[x, y].Status == CellForEnemyDtoStatus.Unknown)
                 {
-                    var fireParameters = new FireParameters {RoomId = room.RoomId, PlayerId = playerId, FieredCell = new CellPosition(x, y)};
-                    var fireResult = await client.FireAsync(fireParameters);
+                    var fireRequest = new FireRequestDto {X = x, Y = y};
+                    var fireResult = await client.FireAsync(fireRequest, room.Id, playerId).ConfigureAwait(false);
                     logger.Info($"Выстрел по координате {(x,y)} с результатом {fireResult.EnemyMap.Cells[x,y].Status}");
-                    return;
+                    return fireResult.EnemyMap;
                 }
             }
         }
 
-        private async Task<RoomResponse> CreateRoom()
-        {
-            var createRoomParameters = new CreateRoomParameters {PlayerName = playerName, PlayerId = playerId};
-            var room = await client.CreateRoomAsync(createRoomParameters);
-            logger.Info($"Комната создана RoomId={room.RoomId}, Status={room.RoomStatus}, PlayerName={createRoomParameters.PlayerName}");
+        private async Task<RoomDto> GetRoomAsync() =>
+            await TryJoinOpenedRoomAsync().ConfigureAwait(false) ?? await CreateRoomAsync().ConfigureAwait(false);
 
-            while (room.RoomStatus != CreateRoomStatus.Ready)
+        private async Task<RoomDto> CreateRoomAsync()
+        {
+            var createRoomRequest = new CreateRoomRequestDto {PlayerName = playerName};
+            var createdRoom = await client.CreateRoomAsync(createRoomRequest, playerId).ConfigureAwait(false);
+            
+            logger.Info($"Создана комната {createdRoom.RoomId}, ожидаем соперника");
+
+            while (true)
             {
-                var getRoomStatusParameters = new GetRoomStatusParameters {PlayerId = playerId, RoomId = room.RoomId};
-                room = await client.GetRoomStatusAsync(getRoomStatusParameters);
-                await Task.Delay(1000);
+                var room = await client.GetRoomAsync(createdRoom.RoomId, playerId).ConfigureAwait(false);
+                if (room.Status == RoomStatusDto.Ready)
+                {
+                    logger.Info($"В комнату {room.Id} подключился соперник {room.Players.First(x => x.Id != playerId).Name}");
+                    return room;
+                }
+
+                await Task.Delay(1000).ConfigureAwait(false);
+            }
+        }
+
+        private async Task<RoomDto> TryJoinOpenedRoomAsync()
+        {
+            var roomList = await client.GetOpenedRoomsAsync(playerId).ConfigureAwait(false);
+            
+            logger.Info($"Найдено {roomList.Rooms.Length} открытых комнат");
+            
+            var openedRoom = roomList.Rooms.FirstOrDefault();
+            if (openedRoom != default)
+            {
+                logger.Info($"Пытаюсь подключиться к комнате {openedRoom.Id}");
+                
+                var joinRequest = new JoinRoomRequestDto {PlayerName = playerName};
+                var joinResult = await client.JoinRoomAsync(joinRequest, openedRoom.Id, playerId).ConfigureAwait(false);
+                if (joinResult.Success)
+                {
+                    var room = await client.GetRoomAsync(openedRoom.Id, playerId).ConfigureAwait(false);
+                    
+                    logger.Info($"Удалось подключиться к комнате {room.Id}, имя соперника {room.Players.First(x => x.Id != playerId).Name}");
+                    
+                    return room;
+                }
             }
 
-            logger.Info($"Комната готова к игре RoomId={room.RoomId}, Status={room.RoomStatus}, AnotherPlayerName={room.AnotherPlayerName}");
-            return room;
+            return default;
         }
     }
 }

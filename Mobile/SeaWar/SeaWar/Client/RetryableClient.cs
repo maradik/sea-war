@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using SeaWar.Client.Contracts;
+using Integration.Dtos.v2;
 
 namespace SeaWar.Client
 {
@@ -15,28 +15,25 @@ namespace SeaWar.Client
             this.retryCount = retryCount;
         }
 
+        public Task<CreateRoomResponseDto> CreateRoomAsync(CreateRoomRequestDto parameters, Guid playerId) =>
+            RetryAsync(x => client.CreateRoomAsync(x.parameters, x.playerId), (parameters, playerId));
 
-        public async Task<RoomResponse> CreateRoomAsync(CreateRoomParameters parameters)
-        {
-            return await RetryAsync(client.CreateRoomAsync, parameters).ConfigureAwait(false);
-        }
+        public Task<JoinRoomResponseDto> JoinRoomAsync(JoinRoomRequestDto parameters, Guid roomId, Guid playerId) =>
+            RetryAsync(x => client.JoinRoomAsync(x.parameters, x.roomId, x.playerId), (parameters, roomId, playerId));
 
-        public async Task<RoomResponse> GetRoomStatusAsync(GetRoomStatusParameters parameters)
-        {
-            return await RetryAsync(client.GetRoomStatusAsync, parameters).ConfigureAwait(false);
-        }
+        public Task<RoomListResponseDto> GetOpenedRoomsAsync(Guid playerId) =>
+            RetryAsync(x => client.GetOpenedRoomsAsync(x), playerId);
 
-        public async Task<GameStatusResponse> GetGameStatusAsync(GetGameStatusParameters parameters)
-        {
-            return await RetryAsync(client.GetGameStatusAsync, parameters).ConfigureAwait(false);
-        }
+        public Task<RoomDto> GetRoomAsync(Guid roomId, Guid playerId) =>
+            RetryAsync(x => client.GetRoomAsync(x.roomId, x.playerId), (roomId, playerId));
 
-        public async Task<GameFireResponse> FireAsync(FireParameters parameters)
-        {
-            return await RetryAsync(client.FireAsync, parameters).ConfigureAwait(false);
-        }
+        public Task<GameDto> GetGameAsync(Guid roomId, Guid playerId) =>
+            RetryAsync(x => client.GetGameAsync(x.roomId, x.playerId), (roomId, playerId));
 
-        public async Task<T2> RetryAsync<T1, T2>( Func<T1, Task<T2>> func, T1 parameters)
+        public Task<FireResponseDto> FireAsync(FireRequestDto parameters, Guid roomId, Guid playerId) =>
+            RetryAsync(x => client.FireAsync(x.parameters, x.roomId, x.playerId), (parameters, roomId, playerId));
+
+        private async Task<T2> RetryAsync<T1, T2>(Func<T1, Task<T2>> func, T1 parameters)
         {
             var retries = 0;
             var toSleep = TimeSpan.FromMilliseconds(1000);
@@ -51,13 +48,15 @@ namespace SeaWar.Client
                 {
                     exception = e;
                 }
+
                 retries++;
                 if (retries < retryCount)
                 {
-                    await Task.Delay(toSleep);
+                    await Task.Delay(toSleep).ConfigureAwait(false);
                     toSleep = TimeSpan.FromMilliseconds(toSleep.TotalMilliseconds * 1.5);
                 }
             }
+
             throw exception;
         }
     }

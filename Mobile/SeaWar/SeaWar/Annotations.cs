@@ -31,6 +31,7 @@ using System;
 // ReSharper disable MemberCanBeProtected.Global
 // ReSharper disable InconsistentNaming
 
+// ReSharper disable once CheckNamespace
 namespace SeaWar.Annotations
 {
   /// <summary>
