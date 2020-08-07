@@ -1,8 +1,7 @@
 ﻿using System;
-using SeaWar.Client.Contracts;
+using Integration.Dtos.v2;
 using SeaWar.ViewModels;
 using Cell = SeaWar.ViewModels.Cell;
-using CellPosition = SeaWar.ViewModels.CellPosition;
 using FinishReason = SeaWar.DomainModels.FinishReason;
 using Map = SeaWar.ViewModels.Map;
 
@@ -10,10 +9,7 @@ namespace SeaWar.Extensions
 {
     public static class ConverterExtensions
     {
-        public static Client.Contracts.CellPosition ToDto(this CellPosition model) =>
-            new Client.Contracts.CellPosition(model.X, model.Y);
-
-        public static Map ToModel(this Client.Contracts.Map dto)
+        public static Map ToModel(this MapDto dto)
         {
             var xLength = dto.Cells.GetLength(0);
             var yLength = dto.Cells.GetLength(1);
@@ -34,7 +30,7 @@ namespace SeaWar.Extensions
             return domainModel;
         }
         
-        public static Map ToModel(this EnemyMap dto)
+        public static Map ToModel(this MapForEnemyDto dto)
         {
             var xLength = dto.Cells.GetLength(0);
             var yLength = dto.Cells.GetLength(1);
@@ -55,46 +51,46 @@ namespace SeaWar.Extensions
             return domainModel;
         }
 
-        public static Cell ToModel(this Client.Contracts.Cell dto) =>
+        public static Cell ToModel(this CellDto dto) =>
             new Cell
             {
                 Status = dto.Status.ToModel()
             };
 
 
-        public static Cell ToModel(this EnemyCell dto) =>
+        public static Cell ToModel(this CellForEnemyDto dto) =>
             new Cell
             {
                 Status = dto.Status.ToModel()
             };
 
-        public static CellStatus ToModel(this Client.Contracts.Cell.CellStatus dto) =>
+        public static CellStatus ToModel(this CellStatusDto dto) =>
             dto switch
             {
-                Client.Contracts.Cell.CellStatus.Empty => CellStatus.Empty,
-                Client.Contracts.Cell.CellStatus.EngagedByShip => CellStatus.Filled,
-                Client.Contracts.Cell.CellStatus.EmptyFired => CellStatus.Missed,
-                Client.Contracts.Cell.CellStatus.EngagedByShipFired => CellStatus.Damaged,
-                Client.Contracts.Cell.CellStatus.ShipNeighbour => CellStatus.Missed,
+                CellStatusDto.Empty => CellStatus.Empty,
+                CellStatusDto.EngagedByShip => CellStatus.Filled,
+                CellStatusDto.EmptyFired => CellStatus.Missed,
+                CellStatusDto.EngagedByShipFired => CellStatus.Damaged,
+                CellStatusDto.ShipNeighbour => CellStatus.Missed,
                 _ => throw new ArgumentException(nameof(dto))
             };
         
-        public static CellStatus ToModel(this EnemyCellStatus dto) =>
+        public static CellStatus ToModel(this CellForEnemyDtoStatus dto) =>
             dto switch
             {
-                EnemyCellStatus.Unknown => CellStatus.Empty,
-                EnemyCellStatus.Missed => CellStatus.Missed,
-                EnemyCellStatus.Damaged => CellStatus.Damaged,
-                EnemyCellStatus.ShipNeighbour => CellStatus.Missed,
+                CellForEnemyDtoStatus.Unknown => CellStatus.Empty,
+                CellForEnemyDtoStatus.Missed => CellStatus.Missed,
+                CellForEnemyDtoStatus.Damaged => CellStatus.Damaged,
+                CellForEnemyDtoStatus.ShipNeighbour => CellStatus.Missed,
                 _ => throw new ArgumentException()
             };
 
-        public static FinishReason ToModel(this Client.Contracts.FinishReason? dto) =>
+        public static FinishReason ToModel(this FinishReasonDto? dto) =>
             dto switch
             {
-                Client.Contracts.FinishReason.ConnectionLost => FinishReason.OpponentConnectionLost,
-                Client.Contracts.FinishReason.Winner => FinishReason.Winner,
-                Client.Contracts.FinishReason.Lost => FinishReason.Lost,
+                FinishReasonDto.ConnectionLost => FinishReason.OpponentConnectionLost,
+                FinishReasonDto.Winner => FinishReason.Winner,
+                FinishReasonDto.Lost => FinishReason.Lost,
                 _ => throw new Exception()
             };
     }

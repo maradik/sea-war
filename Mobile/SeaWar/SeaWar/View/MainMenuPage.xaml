@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="SeaWar.View.MainMenuPage" BackgroundColor="#dee0e6"
+             IsEnabled="{Binding PageEnabled}">
+    <ContentPage.Content>
+        <StackLayout Margin="20" BackgroundColor="#dee0e6">
+            <StackLayout HorizontalOptions="Center">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+
+                    <Label Text="Запустить игру" Grid.Column="0" Grid.Row="0" FontSize="18" HorizontalOptions="Center" TextColor="Sienna" />
+                    <Label Text="Присоединиться к игре" Grid.Column="1" Grid.Row="0" FontSize="18" HorizontalOptions="Center" TextColor="Sienna" />
+
+                    <Grid Grid.Column="0" Grid.Row="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"></RowDefinition>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition Height="*"></RowDefinition>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition Height="*"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        
+                        <Button Text="Один игрок" 
+                                Command="{Binding CreateRoomWithBot}" 
+                                HorizontalOptions="Center" 
+                                FontSize="22"
+                                BackgroundColor="#ffa822"
+                                TextColor="White"
+                                CornerRadius="5"
+                                Grid.Column="0" Grid.Row="1" />
+
+                        <Button Text="Два игрока"
+                                Command="{Binding CreateRoomWithPlayer}"
+                                HorizontalOptions="Center"
+                                FontSize="22"
+                                BackgroundColor="#ffa822"
+                                TextColor="White"
+                                CornerRadius="5"
+                                Grid.Column="0" Grid.Row="3" />
+                    </Grid>
+
+                    <ListView Grid.Column="1" Grid.Row="1" ItemsSource="{Binding Rooms}" SelectionMode="None" ItemTapped="OnRoomSelected">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <TextCell Text="{Binding Title}"/>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Grid>
+            </StackLayout>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

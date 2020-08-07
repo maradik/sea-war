@@ -2,8 +2,6 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using SeaWar.Annotations;
-using SeaWar.Client;
-using SeaWar.Client.Contracts;
 using SeaWar.DomainModels;
 using SeaWar.Validation;
 using SeaWar.View;
@@ -11,7 +9,7 @@ using Xamarin.Forms;
 
 namespace SeaWar.ViewModels
 {
-    public class WelcomePageModelView : INotifyPropertyChanged, IUseValidation
+    public class WelcomePageViewModel : INotifyPropertyChanged, IUseValidation
     {
         private const int minUserNameLength = 5;
         private const string validateMessage = "Имя игрока должно быть не меньше 5 символов";
@@ -65,35 +63,15 @@ namespace SeaWar.ViewModels
 
         public Command StartGame { get; }
 
-        public WelcomePageModelView(GameModel gameModel, Func<GameModel, WaitGamePage> createWaitGamePage, Func<GameModel, GamePage> createGamePage, IClient client)
+        public WelcomePageViewModel(GameModel gameModel, Func<GameModel, MainMenuPage> createMainMenuPage)
         {
             PageEnabled = true;
             StartGame = new Command(async _ =>
             {
                 PageEnabled = false;
                 SavePlayerName();
-
-                var parameters = new CreateRoomParameters
-                {
-                    PlayerName = PlayerName,
-                    PlayerId = gameModel.PlayerId
-                };
-                var createRoomResponse = await client.CreateRoomAsync(parameters);
                 gameModel.PlayerName = PlayerName;
-                gameModel.RoomId = createRoomResponse.RoomId;
-                gameModel.AnotherPlayerName = createRoomResponse.AnotherPlayerName;
-
-                switch (createRoomResponse.RoomStatus)
-                {
-                    case CreateRoomStatus.NotReady:
-                        await Application.Current.MainPage.Navigation.PushModalAsync(createWaitGamePage(gameModel));                        
-                        break;
-                    case CreateRoomStatus.Ready:
-                        await Application.Current.MainPage.Navigation.PushModalAsync(createGamePage(gameModel));
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(createRoomResponse.RoomStatus), createRoomResponse.RoomStatus, null);
-                }
+                await Application.Current.MainPage.Navigation.PushModalAsync(createMainMenuPage(gameModel)).ConfigureAwait(true);
             });
         }
 

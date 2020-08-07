@@ -1,13 +1,16 @@
-﻿using System.Threading.Tasks;
-using SeaWar.Client.Contracts;
+﻿using System;
+using System.Threading.Tasks;
+using Integration.Dtos.v2;
 
 namespace SeaWar.Client
 {
     public interface IClient
     {
-        Task<RoomResponse> CreateRoomAsync(CreateRoomParameters parameters);
-        Task<RoomResponse> GetRoomStatusAsync(GetRoomStatusParameters parameters);
-        Task<GameStatusResponse> GetGameStatusAsync(GetGameStatusParameters parameters);
-        Task<GameFireResponse> FireAsync(FireParameters parameters);
+        Task<CreateRoomResponseDto> CreateRoomAsync(CreateRoomRequestDto parameters, Guid playerId);
+        Task<JoinRoomResponseDto> JoinRoomAsync(JoinRoomRequestDto parameters, Guid roomId, Guid playerId);
+        Task<RoomListResponseDto> GetOpenedRoomsAsync(Guid playerId);
+        Task<RoomDto> GetRoomAsync(Guid roomId, Guid playerId);
+        Task<GameDto> GetGameAsync(Guid roomId, Guid playerId);
+        Task<FireResponseDto> FireAsync(FireRequestDto parameters, Guid roomId, Guid playerId);
     }
 }

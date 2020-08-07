@@ -4,9 +4,9 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Integration.Dtos.v2;
 using SeaWar.Annotations;
 using SeaWar.Client;
-using SeaWar.Client.Contracts;
 using SeaWar.DomainModels;
 using SeaWar.Extensions;
 using SeaWar.View;
@@ -53,7 +53,7 @@ namespace SeaWar.ViewModels
                 application.BeginGame();
             });
 
-            Task.Run(async () => await GetStatusAsync());
+            Task.Run(async () => await GetStatusAsync().ConfigureAwait(true));
             SetOpponentChoiceFormattedStatusAsync();
         }
 
@@ -140,7 +140,7 @@ namespace SeaWar.ViewModels
                                 return;
                             }
 
-                            await FireAsync(cellPosition);
+                            await FireAsync(cellPosition).ConfigureAwait(true);
                         };
                     }
 
@@ -201,61 +201,50 @@ namespace SeaWar.ViewModels
         private async Task FireAsync(CellPosition cellPosition)
         {
             EnabledOpponentGrid = false;
-            await fireTimeoutTimer.StopAsync();
+            await fireTimeoutTimer.StopAsync().ConfigureAwait(true);
 
-            var parameters = new FireParameters
-            {
-                RoomId = gameModel.RoomId,
-                PlayerId = gameModel.PlayerId,
-                FieredCell = cellPosition.ToDto()
-            };
-            var fireResult = await client.FireAsync(parameters);
+            var fireRequestDto = new FireRequestDto{X = cellPosition.X, Y = cellPosition.Y};
+            var fireResult = await client.FireAsync(fireRequestDto, gameModel.RoomId, gameModel.PlayerId).ConfigureAwait(true);
             OpponentMap = fireResult.EnemyMap.ToModel();
 
-            await GetStatusAsync();
+            await GetStatusAsync().ConfigureAwait(true);
         }
 
         private async Task GetStatusAsync()
         {
             while (!pageCancellationTokenSource.Token.IsCancellationRequested)
             {
-                var parameters = new GetGameStatusParameters
+                var game = await client.GetGameAsync(gameModel.RoomId, gameModel.PlayerId).ConfigureAwait(true);
+                if (game.MyMap != null)
                 {
-                    RoomId = gameModel.RoomId,
-                    PlayerId = gameModel.PlayerId
-                };
-
-                var gameStatus = await client.GetGameStatusAsync(parameters);
-                if (gameStatus.MyMap != null)
-                {
-                    MyMap = gameStatus.MyMap.ToModel();
+                    MyMap = game.MyMap.ToModel();
                 }
 
-                switch (gameStatus.GameStatus)
+                switch (game.Status)
                 {
-                    case GameStatus.YourChoice:
-                        await fireTimeoutTimer.StartAsync(periodOfStatusRefresh, gameStatus.YourChoiceTimeout == default ? defaultFireTimeout : gameStatus.YourChoiceTimeout, pageCancellationTokenSource.Token);
+                    case GameStatusDto.YourChoice:
+                        await fireTimeoutTimer.StartAsync(periodOfStatusRefresh, game.YourChoiceTimeout == default ? defaultFireTimeout : game.YourChoiceTimeout, pageCancellationTokenSource.Token).ConfigureAwait(true);
                         EnabledOpponentGrid = true;
                         return;
-                    case GameStatus.PendingForFriendChoice:
+                    case GameStatusDto.PendingForFriendChoice:
                         break;
-                    case GameStatus.Finish:
+                    case GameStatusDto.Finish:
                         gameModel.MyMap = MyMap;
                         gameModel.OpponentMap = OpponentMap;
-                        gameModel.FinishReason = gameStatus.FinishReason.ToModel();
-                        Device.BeginInvokeOnMainThread(async () => { await Application.Current.MainPage.Navigation.PushModalAsync(createFinishPage(gameModel)); });
+                        gameModel.FinishReason = game.FinishReason.ToModel();
+                        Device.BeginInvokeOnMainThread(async () => { await Application.Current.MainPage.Navigation.PushModalAsync(createFinishPage(gameModel)).ConfigureAwait(true); });
                         return;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
 
-                await Task.Delay(periodOfStatusPolling);
+                await Task.Delay(periodOfStatusPolling).ConfigureAwait(true);
             }
         }
 
         private Task UpdateYourChoiceFormattedStatusAsync(TimeSpan remain)
         {
-            FormattedStatus = $"Ходи! Осталось {remain.TotalSeconds.ToString("0")} сек.";
+            FormattedStatus = $"Ходи! Осталось {remain.TotalSeconds:0} сек.";
             StatusColor = Color.Green;
             return Task.CompletedTask;
         }
@@ -266,12 +255,12 @@ namespace SeaWar.ViewModels
             if (!emptyCellPositions.Any())
             {
                 // если пустых клеток нет, то игра должна была уже закончиться к этому моменту, пробуем еще раз получить статус игры с бэкенда
-                await GetStatusAsync();
+                await GetStatusAsync().ConfigureAwait(true);
                 return;
             }
 
             var cellPositionIndex = random.Next(emptyCellPositions.Length);
-            await FireAsync(emptyCellPositions[cellPositionIndex]);
+            await FireAsync(emptyCellPositions[cellPositionIndex]).ConfigureAwait(true);
         }
 
         private Task SetOpponentChoiceFormattedStatusAsync()
