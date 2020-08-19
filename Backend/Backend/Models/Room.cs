@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Backend.Extensions;
 using Backend.Managers;
 
 namespace Backend.Models
@@ -90,7 +91,7 @@ namespace Backend.Models
             Status = !enemyPlayer.AnyShipsAlive() ? RoomStatus.Finished : Status;
             return new FireResponse
             {
-                EnemyMap = enemyPlayer.OwnMap
+                EnemyMap = enemyPlayer.OwnMap.ToEnemyMap()
             };
         }
 
